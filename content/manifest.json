@@ -1,0 +1,24 @@
+{
+  "title": "LLM Engineering — Self Learning Portal",
+  "subtitle": "Short concept notes — learn what each day teaches",
+  "weeks": [
+    {
+      "id": "week1",
+      "title": "Week 1 — Foundations",
+      "days": [
+        {
+          "id": "day3",
+          "title": "Day 3 — Model types (base, chat, reasoning)",
+          "file": "week1/day3.json",
+          "sources": ["lecture transcript (no notebook — lecture day)"]
+        },
+        {
+          "id": "day4",
+          "title": "Day 4 — Transformers, tokens, API",
+          "file": "week1/day4.json",
+          "sources": ["week1/day4.ipynb", "lecture transcript"]
+        }
+      ]
+    }
+  ]
+}

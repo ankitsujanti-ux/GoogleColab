@@ -1,0 +1,18 @@
+{
+  "title": "LLM Engineering — Self Learning Portal",
+  "subtitle": "Structured notes from course notebooks & lectures",
+  "weeks": [
+    {
+      "id": "week1",
+      "title": "Week 1 — Foundations",
+      "days": [
+        {
+          "id": "day04",
+          "title": "Day 4 — Transformers, Tokens & Stateless Memory",
+          "notebook": "../week1/day4.ipynb",
+          "content": "content/week1/day04.html"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+<article class="chapter">
+  <header class="chapter-meta">
+    <span class="badge">Week 1 · Day 4</span>
+    <p class="sources">Sources: lecture transcript + <code>week1/day4.ipynb</code></p>
+  </header>
+
+  <section id="outcomes">
+    <h2>What you should know after today</h2>
+    <ul class="checklist">
+      <li>Explain <strong>GPT</strong> (Generative, Pre-trained, Transformer) and the transformer’s role in modern LLMs.</li>
+      <li>Trace the <strong>timeline</strong> from “Attention Is All You Need” (2017) → GPT → ChatGPT → frontier models.</li>
+      <li>Contrast <strong>traditional ML</strong>, neural nets, and <strong>deep learning</strong> at a high level.</li>
+      <li>Define <strong>tokens</strong>, encode/decode with <code>tiktoken</code>, and see that text ≠ one token per word.</li>
+      <li>State why LLM calls are <strong>stateless</strong> and how “memory” is engineered via full message history.</li>
+      <li>Connect <strong>context length</strong> and repeated history to <strong>API cost</strong>.</li>
+    </ul>
+  </section>
+
+  <section id="recap">
+    <h2>Where you are in the course</h2>
+    <p>By Day 4 you can already:</p>
+    <ul>
+      <li>Call OpenAI (cloud) and local models (e.g. Ollama).</li>
+      <li>Compare frontier models — strengths, limits, trade-offs.</li>
+    </ul>
+    <p>Today adds <strong>conceptual depth</strong> (transformers, tokens, context) that everything later builds on — including agentic AI, context engineering, and agent loops (covered more in later weeks).</p>
+  </section>
+
+  <section id="competition">
+    <h2>Lab context — model competition (optional demo)</h2>
+    <p>Course demo: multiple models play a strategy game; rankings shift by run.</p>
+    <ul>
+      <li><strong>Single run example:</strong> “Charlie” (Grok) won; OSS second; GPT-5 third; “Drew” (Claude Sonnet) last — scores were close (~14 pts spread).</li>
+      <li><strong>Public leaderboard:</strong> thousands of games → rankings stabilize; models with <em>more games played</em> are more trustworthy than models with few runs.</li>
+      <li><strong>Takeaway:</strong> use hands-on comparisons to learn model behavior — not one benchmark score in isolation.</li>
+    </ul>
+  </section>
+
+  <section id="gpt-acronym">
+    <h2>GPT decoded</h2>
+    <table class="concept-table">
+      <thead>
+        <tr><th>Letter</th><th>Meaning</th><th>One-line idea</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>G</strong></td><td>Generative</td><td>Predicts / generates the <em>next tokens</em> in a sequence.</td></tr>
+        <tr><td><strong>P</strong></td><td>Pre-trained</td><td>Trained on massive data (web, books, etc.) before you use it.</td></tr>
+        <tr><td><strong>T</strong></td><td>Transformer</td><td>Neural <em>architecture</em> optimized for sequences and scale.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="transformer-story">
+    <h2>Transformer — story & intuition (not math yet)</h2>
+    <p><strong>Teaching approach in this course:</strong> theory through practice — deeper internals (attention, decoders) appear over the next weeks in code, not upfront.</p>
+
+    <h3>Timeline</h3>
+    <ol class="timeline">
+      <li><strong>2017</strong> — Google: paper <em>“Attention Is All You Need”</em> — new way to wire neurons (<strong>architecture</strong>) with <strong>self-attention</strong>: learn which parts of an input sequence matter.</li>
+      <li><strong>2018</strong> — OpenAI <strong>GPT-1</strong> — early, basic.</li>
+      <li><strong>2019</strong> — <strong>GPT-2</strong> — more notice in the field.</li>
+      <li><strong>2020</strong> — <strong>GPT-3</strong> — scale jump; “just statistics” vs “something huge” debate.</li>
+      <li><strong>2022</strong> — <strong>ChatGPT</strong> (GPT-3.5 + chat/RLHF-style alignment) — chat UX exploded adoption.</li>
+      <li><strong>2023+</strong> — GPT-4, multimodal (4o), GPT-5, etc.</li>
+    </ol>
+
+    <h3>From traditional ML to deep learning (brushstrokes)</h3>
+    <ul>
+      <li><strong>Traditional ML:</strong> statistical model; learn parameters from labeled examples (e.g. credit score from features).</li>
+      <li><strong>Neural network (~1950s idea):</strong> many small “neurons” connected — loosely inspired by brains, not a brain.</li>
+      <li><strong>Deep learning:</strong> many stacked layers → can learn richer patterns with more data and compute.</li>
+      <li><strong>2017 breakthrough:</strong> transformer architecture + attention → scale to bigger data & models <em>more efficiently</em>.</li>
+    </ul>
+
+    <div class="callout important">
+      <strong>Key mindset:</strong> The transformer is a <em>clever efficiency optimization</em> for training and inference at scale — not proven to be the only possible path to intelligence. Alternatives exist (state-space models, hybrids); none has clearly replaced transformers for mainstream LLMs yet. Without transformers, progress might have been slower and API costs potentially much higher.
+    </div>
+  </section>
+
+  <section id="tokens">
+    <h2>Tokens (notebook)</h2>
+    <p>Models do not read “words” — they read <strong>token IDs</strong> from a vocabulary. Same word can split into multiple tokens; rare words often split more.</p>
+
+    <pre><code class="language-python">import tiktoken
+encoding = tiktoken.encoding_for_model("gpt-4.1-mini")
+tokens = encoding.encode("Hi my name is Ed and I like banoffee pie")
+# Decode one token at a time to see subword pieces</code></pre>
+
+    <ul>
+      <li><strong>Encode:</strong> text → list of integer token IDs.</li>
+      <li><strong>Decode:</strong> token ID(s) → text fragment.</li>
+      <li><strong>Why care:</strong> billing, context limits, and prompt design are all token-based.</li>
+    </ul>
+  </section>
+
+  <section id="stateless">
+    <h2>Stateless API & the “memory” illusion (notebook)</h2>
+
+    <h3>Messages format</h3>
+    <p>Chat API expects a <strong>list of dicts</strong> with <code>role</code> and <code>content</code>:</p>
+    <pre><code class="language-python">messages = [
+    {"role": "system", "content": "You are a helpful assistant"},
+    {"role": "user", "content": "Hi! I'm Ed!"}
+]
+response = openai.chat.completions.create(model="gpt-4.1-mini", messages=messages)</code></pre>
+
+    <h3>The surprise</h3>
+    <p>New call with only <code>"What's my name?"</code> → model does <strong>not</strong> know you said “Ed” before.</p>
+
+    <h3>Why</h3>
+    <p>Every API call is <strong>stateless</strong> — a fresh forward pass. No server-side chat memory unless <em>you</em> send history.</p>
+
+    <h3>The fix (what ChatGPT does)</h3>
+    <pre><code class="language-python">messages = [
+    {"role": "system", "content": "You are a helpful assistant"},
+    {"role": "user", "content": "Hi! I'm Ed!"},
+    {"role": "assistant", "content": "Hi Ed! How can I assist you today?"},
+    {"role": "user", "content": "What's my name?"}
+]</code></pre>
+    <p>Model sees full sequence → predicts likely next tokens → “Ed” appears because it’s in the context.</p>
+  </section>
+
+  <section id="recap-five">
+    <h2>Five rules to remember (notebook recap)</h2>
+    <ol>
+      <li>Every LLM call is <strong>stateless</strong>.</li>
+      <li>You pass the <strong>entire conversation</strong> each time (when you want continuity).</li>
+      <li>That creates the <strong>illusion of memory</strong>.</li>
+      <li>It’s not recall — it’s <strong>next-token prediction</strong> over whatever text you included.</li>
+      <li>Longer history → <strong>more tokens</strong> → <strong>higher cost</strong> — and that’s intentional (more context = more compute).</li>
+    </ol>
+  </section>
+
+  <section id="bridge-forward">
+    <h2>Bridges to later topics</h2>
+    <ul>
+      <li><strong>Context window:</strong> max tokens in one request — design prompts and history trimming around this.</li>
+      <li><strong>Context engineering:</strong> what you put in the message list (system, tools, RAG chunks).</li>
+      <li><strong>Agent loops:</strong> repeated stateless calls + tool results appended to messages.</li>
+      <li><strong>Parameters / temperature:</strong> control randomness of token sampling (later labs).</li>
+    </ul>
+  </section>
+
+  <section id="trainer-bullets">
+    <h2>Teach someone else — 60-second version</h2>
+    <blockquote>
+      GPT is a pre-trained transformer that predicts the next token. Transformers won because attention lets them scale efficiently on sequences. When you chat with an API, nothing is remembered unless you resend the full thread — tokens are how the model reads text and how you pay. Memory in products is engineered, not built into a single call.
+    </blockquote>
+  </section>
+</article>

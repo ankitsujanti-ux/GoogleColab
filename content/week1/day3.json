@@ -1,0 +1,122 @@
+{
+  "id": "week1-day3",
+  "title": "Day 3 — Base, Chat, Reasoning & Hybrid Models",
+  "summary": "Read Step 1 → 6 in order. No lab today — this day is model types and when to use each.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "What you already did & today's goal",
+      "remember": "You can call **frontier models** (OpenAI, Gemini, **Llama** via API/Ollama) and **summarize webpages** — today you learn **four model types** and **chat vs reasoning**.",
+      "points": [
+        "Progression: first API contact → local models → compare **what each model type is trained for**.",
+        "By end of day: know **base**, **chat/instruct**, **reasoning**, and **hybrid** models — strengths and trade-offs."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Base model",
+      "remember": "A **base model** only does **next-token prediction** on a sequence — complete the text, not chat.",
+      "points": [
+        "Input = token sequence → output = most likely **next tokens** (repeat to generate length).",
+        "Rare in products you use directly; you **will** use one later when **fine-tuning** a new skill from scratch.",
+        "Real-world analogy: phone **predictive text** — each word you pick extends the sequence; the model suggests what comes next.",
+        "Pre-**ChatGPT** era (e.g. **GPT-3** as base): power users prompted with patterns like `Q: … A: …` then `Q: your question` + `A:` to force Q&A style — hacky, not native chat."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Base", "text": "Sequence in → predict next token" }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "Chat / Instruct model",
+      "remember": "**Chat** (or **Instruct**) models are fine-tuned on **message → response** pairs — roles like **system**, **user**, **assistant**.",
+      "points": [
+        "Training adds dialog structure on top of the base model (e.g. **RLHF** — reinforcement learning from human feedback) → **ChatGPT**.",
+        "**System prompt** — overall instructions for the whole conversation.",
+        "**User** / **assistant** turns alternate — this is the API **`messages`** format you use in labs.",
+        "Prompt trick (no extra training): **chain-of-thought** — e.g. end with “think step by step” so the model emits a more methodical token sequence."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Base", "text": "Completion only" },
+          { "title": "→", "text": "" },
+          { "title": "Chat", "text": "system + user + assistant" }
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Reasoning model",
+      "remember": "A **reasoning** (thinking) model is trained to emit a **reasoning trace** first, then the final answer.",
+      "points": [
+        "Evolution: chain-of-thought prompting → train on examples that **show thinking steps** before the conclusion.",
+        "You see this in products (e.g. **OpenAI o-series** / “thinking” UI) — internal tokens for reasoning, then user-facing reply.",
+        "Generally **stronger on puzzles and hard problems**; uses more tokens (thinking + answer) → **slower, pricier**.",
+        "Anecdote: can feel **cold or over-analytical** for casual creative writing vs chat models — test yourself."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Chat", "text": "User question" },
+          { "title": "→", "text": "" },
+          { "title": "Reasoning", "text": "Thinking trace → answer" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "Hybrid model, reasoning budget & budget forcing",
+      "remember": "**Hybrid** models choose how much to reason per request; **reasoning effort** (budget) can be tuned — including hacky **budget forcing**.",
+      "points": [
+        "**Hybrid** — e.g. **GPT-5**, **Gemini 2.5 Pro**: simple “hi” → little reasoning; hard puzzle → more reasoning.",
+        "**Reasoning budget** / **reasoning effort** — API or product knob for how long the model thinks.",
+        "**Budget forcing** (S1 paper, Jan 2025): inject **`wait`** into the **thinking trace** so the model continues reflecting (“wait, let me reconsider”) — surprisingly effective.",
+        "Higher reasoning budget → usually better **benchmarks**; not always best for latency, cost, or creative tone."
+      ]
+    },
+    {
+      "step": 6,
+      "heading": "Which type when?",
+      "remember": "Pick the type for the **task**: fine-tune from **base**; fast dialog → **chat**; hard logic → **reasoning**; mixed → **hybrid**.",
+      "points": [
+        "**Base** — starting point for **fine-tuning** a new behavior (not locked into chat/reasoning format).",
+        "**Chat** — fast, cheaper, interactive apps; often preferred for **creative / fluent** copy (informal consensus).",
+        "**Reasoning** — math, coding puzzles, multi-step problems when you accept latency and token cost.",
+        "**Hybrid** — default for modern frontier APIs when you want the model to auto-scale thinking."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Trade-offs (rule of thumb)",
+        "left": {
+          "label": "Reasoning / hybrid (hard tasks)",
+          "bad": false,
+          "lines": [
+            "Higher intelligence on benchmarks",
+            "Thinking tokens → slower, costlier",
+            "Best for puzzles & analysis"
+          ]
+        },
+        "right": {
+          "label": "Chat (interactive / creative)",
+          "bad": false,
+          "lines": [
+            "Faster, cheaper per reply",
+            "No long thinking trace",
+            "Better for chat UX & some writing"
+          ]
+        }
+      }
+    }
+  ],
+  "cheatSheet": [
+    "Base — next-token completion only (predictive text)",
+    "Chat / Instruct — system + user + assistant; RLHF → ChatGPT",
+    "Reasoning — thinking trace, then answer; stronger, slower",
+    "Hybrid — auto reasoning effort; budget forcing with wait",
+    "Use base to fine-tune · chat for speed/creative · reasoning for hard problems"
+  ]
+}

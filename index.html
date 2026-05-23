@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Engineering — Learning Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <header class="sidebar-header">
+        <h1 class="portal-title" id="portal-title">Learning Portal</h1>
+        <p class="portal-subtitle" id="portal-subtitle"></p>
+      </header>
+      <nav class="toc" id="toc" aria-label="Table of contents"></nav>
+      <footer class="sidebar-footer">
+        <button type="button" class="btn-ghost" id="btn-toggle-theme" title="Toggle theme">Theme</button>
+      </footer>
+    </aside>
+
+    <main class="reader" id="reader">
+      <article class="page cover" id="cover">
+        <div class="cover-inner">
+          <p class="cover-label">Self-study reference</p>
+          <h2 id="cover-title">LLM Engineering</h2>
+          <p id="cover-desc">Correct terms, easy steps, in order. Pick a chapter from the left.</p>
+          <p class="cover-hint">Live site: <a href="https://ankitsujanti-ux.github.io/GoogleColab/" target="_blank" rel="noopener">ankitsujanti-ux.github.io/GoogleColab</a> · Local: <code>uv run python -m http.server 8080</code></p>
+        </div>
+      </article>
+      <article class="page chapter hidden" id="chapter" aria-live="polite"></article>
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
