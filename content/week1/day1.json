@@ -1,0 +1,80 @@
+{
+  "id": "week1-day1",
+  "title": "Day 1 — First API & website summarizer",
+  "summary": "Frontier LLM API · `.env` · messages · scrape → summarize pipeline.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Call a **frontier LLM** over the network and build a **website summarizer**: URL → scrape → prompt → markdown summary.",
+      "points": [
+        "Lab: `week1/day1.ipynb` · helper: `week1/scraper.py`."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Frontier LLM",
+      "remember": "Model runs on the **provider's servers** — you send prompts via **API key** and pay per use (tokens).",
+      "points": [
+        "Not running weights on your laptop (that's Ollama / HF later).",
+        "Jupyter: run cells top-to-bottom with project `.venv` kernel."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Secrets: `.env`",
+      "remember": "`load_dotenv(override=True)` loads **`OPENAI_API_KEY`** — re-run after editing `.env`.",
+      "points": [
+        "Never commit keys · no spaces around `=` in `.env`."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Messages format",
+      "remember": "API expects a **list of dicts**: `role` = `system` | `user` | `assistant`, plus `content`.",
+      "points": [
+        "**System** = rules, tone, format for the whole task.",
+        "**User** = your question + data (e.g. scraped website text)."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "system", "text": "Instructions" },
+          { "title": "→", "text": "" },
+          { "title": "user", "text": "Task + data" },
+          { "title": "→", "text": "" },
+          { "title": "assistant", "text": "Model reply" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "OpenAI client",
+      "remember": "`OpenAI()` wraps HTTP **`chat.completions.create`** — response text is in `choices[0].message.content`.",
+      "code": "from openai import OpenAI\nopenai = OpenAI()\nresponse = openai.chat.completions.create(\n    model=\"gpt-4.1-mini\",\n    messages=[{\"role\": \"user\", \"content\": \"Hello!\"}],\n)\nresponse.choices[0].message.content"
+    },
+    {
+      "step": 6,
+      "heading": "Scraping",
+      "remember": "`fetch_website_contents(url)` returns plain text (capped ~2000 chars) — enough for summaries, not full SPAs.",
+      "points": [
+        "JS-heavy sites may fail — need browser automation for production.",
+        "Bot protection (e.g. CloudFront) → 403."
+      ]
+    },
+    {
+      "step": 7,
+      "heading": "End-to-end pipeline",
+      "remember": "`messages_for(website)` builds system + user prompts · `summarize(url)` scrape → API → return markdown.",
+      "points": [
+        "Use cases: competitor pages, wiki TL;DR, email subject lines.",
+        "Display with `IPython.display.Markdown` in notebook."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "load_dotenv → OpenAI() → messages → chat.completions.create",
+    "system = rules · user = task + scraped text",
+    "Lab: day1.ipynb + scraper.py"
+  ]
+}

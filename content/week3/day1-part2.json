@@ -1,0 +1,81 @@
+{
+  "id": "week3-day1-part2",
+  "title": "Week 3 Day 1 (2/2) — Colab & multimodal",
+  "summary": "Part 2 of 2 · Colab GPU, **HF_TOKEN** secrets, **diffusion** images, **TTS**, T4 vs A100.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Google Colab basics",
+      "remember": "Colab = cloud Jupyter + **free GPU** (often **T4**, ~15GB VRAM). Fresh session = re-download models each time.",
+      "points": [
+        "`Shift+Enter` run cell · `!pip install pkg` = shell command (leading `!`).",
+        "Many libs pre-installed (e.g. **gradio**).",
+        "**Runtime → Disconnect and delete runtime** when done on paid GPUs."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Check GPU",
+      "remember": "`!nvidia-smi` should show **Tesla T4** and ~15GB — matches Colab resource panel.",
+      "points": [
+        "Run GPU check cell before heavy models.",
+        "Watch **GPU RAM** in sidebar (View resources)."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "HF token in Colab (not `.env`)",
+      "remember": "Colab **Secrets**: name **`HF_TOKEN`**, value `hf_…`, **write** permission, toggle **notebook access** every session.",
+      "points": [
+        "Create: HF avatar → Settings → Access Tokens → **write** (needed for uploads later).",
+        "```python\nfrom huggingface_hub import login\nfrom google.colab import userdata\nlogin(userdata.get('HF_TOKEN'))\n```",
+        "Secrets tie to your Google account — not shared if you share the notebook link."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Diffusion images (`diffusers`)",
+      "remember": "**Diffusion** models = image generation (not text transformers). **`num_inference_steps`** = denoising iterations.",
+      "points": [
+        "**`pipeline`** from `diffusers` — e.g. Stability **SDXL Turbo** on T4.",
+        "Large Hub downloads (GB); GPU RAM spikes when model loads.",
+        "**Restart kernel** between big models: Runtime → Restart session.",
+        "Two-stage + refiner models can barely fit T4 — may need **A100**."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Noise", "text": "Random start" },
+          { "title": "→", "text": "" },
+          { "title": "Steps", "text": "Denoise per prompt" },
+          { "title": "→", "text": "" },
+          { "title": "Image", "text": "Output" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "TTS on Colab",
+      "remember": "Free **text-to-speech** via `transformers` (e.g. **Microsoft SpeechT5**) — contrast with paid OpenAI TTS in Week 2.",
+      "points": [
+        "May need extra `!pip install` (see `week3/day1` notebook).",
+        "Runs on T4 after model download."
+      ]
+    },
+    {
+      "step": 6,
+      "heading": "T4 vs A100",
+      "remember": "**A100** ≈ 40GB VRAM, paid Colab (~compute units/hour). Example: **FLUX.1-schnell** ~37GB used — ~$0.04/image in lecture estimate.",
+      "points": [
+        "T4: free tier, great for learning.",
+        "Always **disconnect** paid runtime when finished (Manage sessions → Terminate).",
+        "Lab: `week3/day1.ipynb` (Colab link in notebook)."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "Colab secrets: HF_TOKEN + write + notebook toggle",
+    "diffusers = images · steps = denoise count",
+    "Restart kernel between huge models · disconnect paid GPU"
+  ]
+}

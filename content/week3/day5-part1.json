@@ -1,0 +1,76 @@
+{
+  "id": "week3-day5-part1",
+  "title": "Week 3 Day 5 (1/2) — Inference under the hood",
+  "summary": "Part 1 of 2 · Next-token loop · temperature · `visualizer.py` in Cursor.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Autoregressive generation loop",
+      "remember": "Each step: forward pass → **vocab-sized** probability vector → **pick one token** → append to input → repeat.",
+      "points": [
+        "Streaming UI = one token at a time from this loop.",
+        "Reasoning models \"think\" by emitting tokens that later tokens must stay consistent with.",
+        "Not magic — statistical consistency over a long chain."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Prompt IDs", "text": "Input sequence" },
+          { "title": "→", "text": "" },
+          { "title": "Forward", "text": "Logits" },
+          { "title": "→", "text": "" },
+          { "title": "Pick + append", "text": "Loop" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Temperature",
+      "remember": "**temperature=0** → usually take **highest-probability** token (deterministic). Higher → **sample** from distribution (more variety).",
+      "points": [
+        "OpenAI: `temperature` on `chat.completions.create`.",
+        "HF: `temperature` (and related) on `model.generate()`.",
+        "\"More creative\" ≈ more willing to pick non-top tokens."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Temperature",
+        "left": {
+          "label": "0",
+          "bad": false,
+          "lines": ["Argmax token", "Repeatable output"]
+        },
+        "right": {
+          "label": ">0",
+          "bad": false,
+          "lines": ["Sample by probability", "More diverse text"]
+        }
+      }
+    },
+    {
+      "step": 3,
+      "heading": "`visualizer.py` (local, not Colab first)",
+      "remember": "Course **`week3/visualizer.py`** + **`day5.ipynb`** in **Cursor** — uses OpenAI **logprobs** to show top next tokens per step.",
+      "points": [
+        "Prompt example: \"Describe the color blue to someone who has never seen, in one sentence.\"",
+        "Step 1: **blue** ~100% · then **is** vs **feels** · chain builds poetic answer from greedy choices.",
+        "Proves frontier quality = strong next-token statistics, not a separate \"truth module\".",
+        "Try other prompts; reimplement with HF `generate` + logits for practice."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Logprobs API idea",
+      "remember": "You can request **top logprobs** per token from OpenAI — same loop you'd code manually with HF models.",
+      "points": [
+        "Hands-on beats only hearing the theory.",
+        "Link to Week 1–2: typewriter effect = this loop exposed in the UI."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "Generate = repeat: forward → pick token → append",
+    "temperature controls randomness of pick",
+    "visualizer.py shows logprobs step-by-step"
+  ]
+}

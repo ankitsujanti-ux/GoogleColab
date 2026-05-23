@@ -7,16 +7,148 @@
       "title": "Week 1 — Foundations",
       "days": [
         {
+          "id": "day1",
+          "title": "Day 1 — First API & website summarizer",
+          "file": "week1/day1.json",
+          "sources": ["week1/day1.ipynb", "week1/scraper.py", "week1_week2_by_day.md"]
+        },
+        {
+          "id": "day2",
+          "title": "Day 2 — Chat Completions & compatible APIs",
+          "file": "week1/day2.json",
+          "sources": ["week1/day2.ipynb", "week1/solution.py", "week1_week2_by_day.md"]
+        },
+        {
           "id": "day3",
-          "title": "Day 3 — Model types (base, chat, reasoning)",
+          "title": "Day 3 — Model types & frontier labs",
           "file": "week1/day3.json",
           "sources": ["lecture transcript (no notebook — lecture day)"]
         },
         {
+          "id": "day4-part1",
+          "title": "Day 4 (1/2) — GPT & scaling",
+          "file": "week1/day4-part1.json",
+          "sources": ["week1/day4.ipynb", "lecture §1–§3"]
+        },
+        {
+          "id": "day4-part2",
+          "title": "Day 4 (2/2) — Tokens, lab & costs",
+          "file": "week1/day4-part2.json",
+          "sources": ["week1/day4.ipynb", "lecture §4–§7"]
+        },
+        {
+          "id": "day5",
+          "title": "Day 5 — Multi-step brochure & streaming",
+          "file": "week1/day5.json",
+          "sources": ["week1/day5.ipynb", "week1_week2_by_day.md"]
+        }
+      ]
+    },
+    {
+      "id": "week2",
+      "title": "Week 2 — Frontier apps & Gradio",
+      "days": [
+        {
+          "id": "day1-part1",
+          "title": "Day 1 (1/2) — Many providers",
+          "file": "week2/day1-part1.json",
+          "sources": ["week2/day1.ipynb", "week1_week2_by_day.md"]
+        },
+        {
+          "id": "day1-part2",
+          "title": "Day 1 (2/2) — LiteLLM & multi-bot",
+          "file": "week2/day1-part2.json",
+          "sources": ["week2/day1.ipynb", "week1_week2_by_day.md"]
+        },
+        {
+          "id": "day2",
+          "title": "Day 2 — Gradio UIs",
+          "file": "week2/day2.json",
+          "sources": ["week2/day2.ipynb", "week1_week2_by_day.md"]
+        },
+        {
+          "id": "day3",
+          "title": "Day 3 — Conversational AI",
+          "file": "week2/day3.json",
+          "sources": ["week2/day3.ipynb", "week1_week2_by_day.md"]
+        },
+        {
           "id": "day4",
-          "title": "Day 4 — Transformers, tokens, API",
-          "file": "week1/day4.json",
-          "sources": ["week1/day4.ipynb", "lecture transcript"]
+          "title": "Day 4 — Tool calling",
+          "file": "week2/day4.json",
+          "sources": ["week2/day4.ipynb", "week1_week2_by_day.md"]
+        },
+        {
+          "id": "day5",
+          "title": "Day 5 — Multimodal & Blocks",
+          "file": "week2/day5.json",
+          "sources": ["week2/day5.ipynb", "week1_week2_by_day.md"]
+        }
+      ]
+    },
+    {
+      "id": "week3",
+      "title": "Week 3 — Hugging Face & open source",
+      "days": [
+        {
+          "id": "day1-part1",
+          "title": "Day 1 (1/2) — Hugging Face & Ollama",
+          "file": "week3/day1-part1.json",
+          "sources": ["week3/day1.ipynb", "lecture", "week3_summary.md §1–2"]
+        },
+        {
+          "id": "day1-part2",
+          "title": "Day 1 (2/2) — Colab & multimodal",
+          "file": "week3/day1-part2.json",
+          "sources": ["week3/day1.ipynb", "lecture", "week3_summary.md §4"]
+        },
+        {
+          "id": "day2-part1",
+          "title": "Day 2 (1/2) — Pipelines API",
+          "file": "week3/day2-part1.json",
+          "sources": ["week3/day2.ipynb", "lecture", "week3_summary.md §3.1"]
+        },
+        {
+          "id": "day2-part2",
+          "title": "Day 2 (2/2) — Pipeline tasks",
+          "file": "week3/day2-part2.json",
+          "sources": ["week3/day2.ipynb", "lecture", "week3_summary.md §3.1"]
+        },
+        {
+          "id": "day3-part1",
+          "title": "Day 3 (1/2) — Tokenizers",
+          "file": "week3/day3-part1.json",
+          "sources": ["week3/day3.ipynb", "lecture", "week3_summary.md §5"]
+        },
+        {
+          "id": "day3-part2",
+          "title": "Day 3 (2/2) — Chat templates",
+          "file": "week3/day3-part2.json",
+          "sources": ["week3/day3.ipynb", "lecture", "week3_summary.md §5.6"]
+        },
+        {
+          "id": "day4-part1",
+          "title": "Day 4 (1/2) — Models & quantization",
+          "file": "week3/day4-part1.json",
+          "sources": ["week3/day4.ipynb", "lecture", "week3_summary.md §6.1–6.4"]
+        },
+        {
+          "id": "day4-part2",
+          "title": "Day 4 (2/2) — Inside the transformer",
+          "file": "week3/day4-part2.json",
+          "sources": ["week3/day4.ipynb", "lecture", "week3_summary.md §6.5"]
+        },
+        {
+          "id": "day5-part1",
+          "title": "Day 5 (1/2) — Inference under the hood",
+          "file": "week3/day5-part1.json",
+          "sources": ["week3/visualizer.py", "week3/day5.ipynb", "week3_summary.md §7"]
+        },
+        {
+          "id": "day5-part2",
+          "title": "Day 5 (2/2) — Meeting minutes & exercise",
+          "file": "week3/day5-part2.json",
+          "sources": ["week3/day5.ipynb", "lecture", "week3_summary.md §8–10"]
         }
       ]
     }

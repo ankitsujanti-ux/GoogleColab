@@ -1,0 +1,64 @@
+{
+  "id": "week2-day4",
+  "title": "Day 4 — Tool calling",
+  "summary": "Function calling loop · SQLite truth · FlightAI demo.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Model **requests tools** — your Python runs them — results go back until the model answers the user.",
+      "points": [
+        "Lab: `week2/day4.ipynb` · **source of truth** = database/API, not LLM weights."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Tool schema",
+      "remember": "Pass `tools=[{\"type\": \"function\", \"function\": {name, description, parameters}}]` — **JSON Schema** for arguments.",
+      "points": [
+        "Good descriptions help the model pick the right tool."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Tool loop",
+      "remember": "When `finish_reason == \"tool_calls\"` → run functions → append assistant message + **`role: tool`** messages → call API again.",
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "User", "text": "Question" },
+          { "title": "→", "text": "" },
+          { "title": "Model", "text": "tool_calls" },
+          { "title": "→", "text": "" },
+          { "title": "Your code", "text": "DB/API" },
+          { "title": "→", "text": "" },
+          { "title": "Model", "text": "Final answer" }
+        ]
+      },
+      "code": "while response.choices[0].finish_reason == \"tool_calls\":\n    message = response.choices[0].message\n    messages.append(message)\n    messages.extend(handle_tool_calls(message))\n    response = openai.chat.completions.create(..., tools=tools)"
+    },
+    {
+      "step": 4,
+      "heading": "SQLite example",
+      "remember": "Ticket **prices** live in SQLite — tool queries DB; model explains the numeric result.",
+      "points": [
+        "Without tools, model may **hallucinate** prices.",
+        "Cap max loop iterations · handle bad `json.loads` on arguments."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Gradio + tools",
+      "remember": "`ChatInterface` + `get_ticket_price` tool — FlightAI airline demo.",
+      "points": [
+        "Exercise: add tool to **set** ticket price.",
+        "Also see `week2/stock_research_public.py` for related patterns."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "tools= in create · finish_reason tool_calls",
+    "role: tool + tool_call_id in responses",
+    "Truth from DB/API, not the model"
+  ]
+}

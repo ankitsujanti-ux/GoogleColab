@@ -1,0 +1,51 @@
+{
+  "id": "week3-day3-part2",
+  "title": "Week 3 Day 3 (2/2) — Chat templates",
+  "summary": "Part 2 of 2 · `apply_chat_template` · LLMs don't read JSON · lab on Colab.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "OpenAI messages are not what the model sees",
+      "remember": "The transformer gets **one sequence of token IDs** — `apply_chat_template` converts `role`/`content` dicts into model-specific **special token strings**.",
+      "points": [
+        "No separate \"system section\" in the neural net — only numbers in order.",
+        "Headers like `<|start_header_id|>system` are tokens the model saw millions of times in training.",
+        "Lab: `week3/day3.ipynb` — compare base vs `-Instruct` tokenizers."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "`apply_chat_template`",
+      "remember": "Use **instruct** tokenizer + `apply_chat_template(messages, tokenize=False)` to inspect the real prompt string.",
+      "points": [
+        "```python\nfrom transformers import AutoTokenizer\n\ntokenizer = AutoTokenizer.from_pretrained(\n    \"meta-llama/Llama-3.2-3B-Instruct\"\n)\nmessages = [\n    {\"role\": \"system\", \"content\": \"You are helpful.\"},\n    {\"role\": \"user\", \"content\": \"Tell a joke for data scientists.\"},\n]\ntext = tokenizer.apply_chat_template(\n    messages, tokenize=False, add_generation_prompt=True\n)\n```",
+        "`add_generation_prompt=True` adds tokens that cue the **assistant** reply.",
+        "Eureka: chat API format is **convention encoded as tokens**, not model architecture."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "messages[]", "text": "OpenAI-style dicts" },
+          { "title": "→", "text": "" },
+          { "title": "template", "text": "Special tokens + text" },
+          { "title": "→", "text": "" },
+          { "title": "token IDs", "text": "Model input" }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "Encode for GPU (preview day 4)",
+      "remember": "`return_tensors=\"pt\"` + `.to(\"cuda\")` — PyTorch tensors on GPU before `model.generate()`.",
+      "points": [
+        "You'll repeat this pattern every day 4–5 lab.",
+        "Compare printed template to what you thought \"messages\" meant."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "LLM input = token ID sequence only",
+    "apply_chat_template(messages) → model-specific string",
+    "Instruct tokenizer required for chat roles"
+  ]
+}

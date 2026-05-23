@@ -1,0 +1,51 @@
+{
+  "id": "week2-day3",
+  "title": "Day 3 — Conversational AI",
+  "summary": "`ChatInterface` · history → messages · dynamic system prompt.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Build a **chat app** with session history — Gradio **`ChatInterface`** + OpenAI streaming.",
+      "points": [
+        "Lab: `week2/day3.ipynb`."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "ChatInterface",
+      "remember": "`gr.ChatInterface(fn=chat, type=\"messages\")` — callback gets **`(message, history)`**.",
+      "points": [
+        "Convert Gradio history to OpenAI dicts before each API call."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Building messages",
+      "remember": "`messages = [system] + history + [new user]` — same stateless rule as Week 1 Day 4: **resend full thread**.",
+      "code": "def chat(message, history):\n    history = [{\"role\": h[\"role\"], \"content\": h[\"content\"]} for h in history]\n    messages = [{\"role\": \"system\", \"content\": system_message}] + history\n    messages.append({\"role\": \"user\", \"content\": message})\n    # stream=True, yield partial response"
+    },
+    {
+      "step": 4,
+      "heading": "Domain system prompt",
+      "remember": "System message = store policy, tone, catalog facts — e.g. clothes shop sales assistant.",
+      "points": [
+        "**One-shot examples** in system prompt show desired reply style."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Dynamic system prompt",
+      "remember": "If user mentions a keyword (e.g. \"belt\"), **append** compliance rules to system content for that turn.",
+      "points": [
+        "Support, sales, HR bots — pattern works behind any API, not only Gradio.",
+        "Pitfall: replacing whole system prompt instead of appending rules."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "ChatInterface + type=messages",
+    "system + history + new user each call",
+    "Dynamic system = append rules on keywords"
+  ]
+}

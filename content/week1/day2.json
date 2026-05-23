@@ -1,0 +1,83 @@
+{
+  "id": "week1-day2",
+  "title": "Day 2 — Chat Completions & compatible APIs",
+  "summary": "HTTP vs SDK · Gemini · Ollama · DeepSeek via same OpenAI client shape.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "**Chat Completions** = send a conversation, get the next assistant message — same idea for OpenAI, Gemini, and **Ollama**.",
+      "points": [
+        "Lab: `week1/day2.ipynb` · reference: `week1/solution.py` (Ollama summarizer)."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "HTTP vs Python SDK",
+      "remember": "`POST .../v1/chat/completions` + Bearer token = same as `openai.chat.completions.create` — the library is not the model.",
+      "points": [
+        "Payload: `model`, `messages`, optional params.",
+        "SDK is convenience; understand HTTP for debugging."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "OpenAI-compatible APIs",
+      "remember": "Change **`base_url`** + **`api_key`** → keep `chat.completions.create` — **one code shape, many vendors**.",
+      "visual": {
+        "type": "three-cards",
+        "cards": [
+          { "title": "OpenAI", "text": "Default base_url" },
+          { "title": "Gemini", "text": "generativelanguage.googleapis.com/.../openai/" },
+          { "title": "Ollama", "text": "localhost:11434/v1" }
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Google Gemini",
+      "remember": "`GOOGLE_API_KEY` + Gemini OpenAI-compatible base URL — same messages list.",
+      "points": [
+        "Lab checks key format (e.g. starts with expected prefix)."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Ollama local",
+      "remember": "`ollama serve` · `ollama pull llama3.2` · client `base_url=http://localhost:11434/v1`, `api_key=\"ollama\"`.",
+      "points": [
+        "Data stays on your machine — homework: rebuild Day 1 summarizer with Ollama.",
+        "Avoid huge local models if RAM is limited."
+      ],
+      "code": "ollama = OpenAI(base_url=\"http://localhost:11434/v1\", api_key=\"ollama\")\nollama.chat.completions.create(model=\"llama3.2\", messages=[...])"
+    },
+    {
+      "step": 6,
+      "heading": "DeepSeek via Ollama",
+      "remember": "Reasoning-style models (e.g. **deepseek-r1**) can run locally through Ollama — same API pattern.",
+      "points": [
+        "When to use: zero API cost, privacy, prototyping.",
+        "When to use cloud: best quality, speed, no local GPU/RAM fight."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Cloud vs local",
+        "left": {
+          "label": "Frontier API",
+          "bad": false,
+          "lines": ["Best quality", "Per-token cost", "Fast launch"]
+        },
+        "right": {
+          "label": "Ollama",
+          "bad": false,
+          "lines": ["Free local", "Privacy", "Hardware limits"]
+        }
+      }
+    }
+  ],
+  "cheatSheet": [
+    "Chat Completions = messages in, assistant out",
+    "OpenAI-compatible = base_url + api_key",
+    "Ollama: 11434/v1 · pull model first"
+  ]
+}

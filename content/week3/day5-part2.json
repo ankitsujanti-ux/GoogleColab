@@ -1,0 +1,79 @@
+{
+  "id": "week3-day5-part2",
+  "title": "Week 3 Day 5 (2/2) — Meeting minutes & exercise",
+  "summary": "Part 2 of 2 · STT → Llama minutes · streaming · synthetic data assignment.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Commercial-style project",
+      "remember": "**Meeting minutes**: audio → transcript → **markdown** summary, discussion, takeaways, action items — hybrid **frontier + open source**.",
+      "points": [
+        "Real product pattern (Zoom-style features).",
+        "Colab lab: `week3/day5.ipynb` · optional Gradio in community notebooks."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Audio", "text": "Meeting file" },
+          { "title": "→", "text": "" },
+          { "title": "STT", "text": "Whisper or OpenAI" },
+          { "title": "→", "text": "" },
+          { "title": "Llama", "text": "Minutes MD" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Speech-to-text (step 1)",
+      "remember": "Two paths: **Whisper `pipeline`** (free, slower on Colab) vs **`openai.audio.transcriptions`** (paid, often faster).",
+      "points": [
+        "Colab secret for frontier path: exact name **`OPENAI_API_KEY`**.",
+        "Compare transcripts — punctuation may differ; content similar.",
+        "You only need one STT path for the exercise."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Minutes with open Llama",
+      "remember": "Same Day 4 pattern + **`TextStreamer`** for live markdown output.",
+      "points": [
+        "System + user prompts repeat format (summary, discussion, takeaways, actions) — repetition improves alignment.",
+        "4-bit **Llama 3.2 3B** (or larger if VRAM allows).",
+        "Watch GPU RAM on second model load in same session."
+      ],
+      "code": "from transformers import TextStreamer\n\nstreamer = TextStreamer(tokenizer)\nmodel.generate(\n    **inputs,\n    streamer=streamer,\n    max_new_tokens=512,\n)"
+    },
+    {
+      "step": 4,
+      "heading": "Week 3 assignment",
+      "remember": "Build a **synthetic dataset generator** — describe schema → LLM produces many rows (CSV/JSONL) for tests, fine-tuning, evals.",
+      "points": [
+        "Try multiple open models · with/without quantization.",
+        "Optional **Gradio** UI · share examples with course.",
+        "Practice until `apply_chat_template` and pad/eos pattern are muscle memory."
+      ],
+      "visual": {
+        "type": "three-cards",
+        "cards": [
+          { "title": "Frontier", "text": "Best quality, API cost" },
+          { "title": "Open + quant", "text": "Private, cheap at scale" },
+          { "title": "Hybrid", "text": "STT frontier + summary local" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "Week 3 wrap-up",
+      "remember": "You can combine **frontier + open source**, use **pipelines** and **models**, and reason about **tokens, layers, inference**.",
+      "points": [
+        "Next week (course): **compare LLMs** and code generation — then **RAG**.",
+        "Keep Colab hygiene: GPU reconnect, disconnect paid runtimes, HF_TOKEN each notebook."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "Audio → STT → chat template → generate + streamer",
+    "OPENAI_API_KEY in Colab for paid STT",
+    "Exercise: synthetic data generator + Gradio optional"
+  ]
+}

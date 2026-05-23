@@ -1,0 +1,62 @@
+{
+  "id": "week2-day1-part1",
+  "title": "Week 2 Day 1 (1/2) — Many providers",
+  "summary": "Part 1 of 2 · Multi-vendor `.env` · reasoning · OpenRouter · model comparison.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Use **many frontier providers** from one codebase — compare models, try **reasoning**, intro **OpenRouter** and **LiteLLM**.",
+      "points": [
+        "Lab: `week2/day1.ipynb`."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Multi-provider setup",
+      "remember": "Separate keys in `.env` — each vendor gets `OpenAI(api_key=..., base_url=...)`.",
+      "points": [
+        "OpenAI, Anthropic, Google, DeepSeek, Groq, Grok, OpenRouter — skip what you don't configure."
+      ],
+      "visual": {
+        "type": "labs",
+        "rows": [
+          { "lab": "OpenAI", "models": "GPT family", "product": "Default" },
+          { "lab": "Anthropic", "models": "Claude", "product": "Compatible API" },
+          { "lab": "Google", "models": "Gemini", "product": "OpenAI-compatible URL" },
+          { "lab": "OpenRouter", "models": "Many via one key", "product": "Gateway" }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "Reasoning models",
+      "remember": "GPT-5 family: pass **`reasoning_effort`** (`minimal`, `low`, …) — model spends compute on internal reasoning tokens.",
+      "points": [
+        "Different from plain chat — tuned for harder puzzles/planning.",
+        "Compare same prompt across GPT, Claude, Gemini, Groq, DeepSeek, Grok in lab."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Ollama & native SDKs",
+      "remember": "Local **`llama3.2`** still available · optional large **`gpt-oss`** if 16GB+ RAM · or use **`anthropic.Anthropic`** / **`google.genai`** natively.",
+      "points": [
+        "Compatible API is enough for most apps — native SDKs when you need vendor-specific features."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "OpenRouter",
+      "remember": "One gateway: `base_url=https://openrouter.ai/api/v1` — model ids like `openai/gpt-4.1`, `anthropic/claude-...`.",
+      "points": [
+        "Good for bake-offs and accessing models without separate integrations."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "One OpenAI client class per base_url",
+    "reasoning_effort on supported GPT-5 calls",
+    "OpenRouter = unified model gateway"
+  ]
+}

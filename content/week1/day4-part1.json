@@ -1,0 +1,250 @@
+{
+  "id": "week1-day4-part1",
+  "title": "Day 4 (1/2) — GPT, transformers & scaling",
+  "summary": "Part 1 of 2 · Steps 1–14 · §1–§3 lecture. Next: **Day 4 (2/2)** for tokens, lab & costs.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "What GPT stands for",
+      "remember": "**GPT** = **G**enerative **P**re-trained **T**ransformer — a model that predicts the next **token** using a **transformer** trained on large data.",
+      "points": [
+        "**Generative** — output is generated token-by-token (next-token prediction), not a single fixed label.",
+        "**Pre-trained** — weights are learned on large corpora first; your API call uses that base model (plus any product tuning).",
+        "**Transformer** — the **architecture** (how layers are wired); Step 2 explains why it matters."
+      ],
+      "visual": {
+        "type": "three-cards",
+        "cards": [
+          { "label": "G", "title": "Generative", "text": "Next-token prediction" },
+          { "label": "P", "title": "Pre-trained", "text": "Trained before your prompt" },
+          { "label": "T", "title": "Transformer", "text": "Architecture (Step 2)" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Transformer (the T in GPT)",
+      "remember": "A **transformer** uses **self-attention** on **sequences** so each token can use context from earlier tokens — that enabled scaling to modern **LLMs**.",
+      "points": [
+        "Comes from the 2017 paper *Attention Is All You Need* — an **architecture**, not just more data.",
+        "**Self-attention** — when processing one token, the model learns which other tokens in the sequence to weight.",
+        "Why it matters for you: efficient training at scale → large **parameters**, lower cost per capability vs older sequence models.",
+        "Internals (layers, decoders) come later in the course; today = purpose and vocabulary only."
+      ],
+      "visual": {
+        "type": "attention",
+        "sentence": "The cat sat on the mat",
+        "focus": "sat",
+        "looksAt": ["cat", "on", "mat"]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "Tokens (overview)",
+      "remember": "The model reads **token IDs**, not raw English — billing and **context window** are counted in **tokens** (deep dive in **Day 4 Part 2**).",
+      "points": [
+        "**Tokenization** = text → list of integer **token IDs** before the neural net runs.",
+        "Lab preview: `tiktoken` in `week1/day4.ipynb` (Part 2 Steps 9–10)."
+      ],
+      "visual": {
+        "type": "tokens",
+        "text": "Hi my name is Ed and I like banoffee pie",
+        "pieces": ["Hi", " my", " name", " is", " Ed", " and", " I", " like", " ban", "offee", " pie"]
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Stateless API & the messages list",
+      "remember": "Each `chat.completions` call is **stateless** — you must pass the full **messages** array every time; continuity is **context**, not server memory.",
+      "points": [
+        "The API does not store prior turns; a new HTTP request starts with no hidden history.",
+        "**messages** = `[{role, content}, ...]` — typically **system**, **user**, **assistant** roles for each turn.",
+        "The model runs **next-token prediction** on the entire serialized conversation you send in that request.",
+        "If an earlier turn said “I'm Ed” and you omit it from `messages`, the model cannot infer it — notebook demo in **Part 2**.",
+        "**ChatGPT**-style products resend the growing thread each message → illusion of **memory**; you pay tokens for all of it."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Same API — different messages payload",
+        "left": {
+          "label": "Incomplete context",
+          "bad": true,
+          "lines": ["messages: [user: What's my name?]", "No prior turn with the name", "Response: unknown"]
+        },
+        "right": {
+          "label": "Full context",
+          "bad": false,
+          "lines": ["messages: [system, user: I'm Ed, assistant: Hi Ed!, user: What's my name?]", "Name in context", "Response: Ed"]
+        }
+      }
+    },
+    {
+      "step": 5,
+      "heading": "Before transformers — LSTM",
+      "remember": "**LSTM** (long short-term memory), a **recurrent neural network**, modeled sequences deeply but could not **parallelize** training like transformers.",
+      "points": [
+        "Many researchers thought LSTMs understood sequence relationships **better** than early transformers.",
+        "**RNN/LSTM** flow: process timestep-by-step; earlier outputs feed the next step → hard to run all steps **in parallel** → slow, expensive to scale.",
+        "**Transformer** trade-off: simpler mechanism (**attention**), massively **parallel** training → scale won over “more clever” recurrence.",
+        "Paper title *Attention Is All You Need* = you may not need all the RNN complexity if **attention** plus scale is enough."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Why transformers replaced LSTMs",
+        "left": {
+          "label": "LSTM / RNN",
+          "bad": false,
+          "lines": ["Sequential steps", "Hard to parallelize", "Strong but slow at scale"]
+        },
+        "right": {
+          "label": "Transformer",
+          "bad": false,
+          "lines": ["Self-attention", "Parallel training", "Simpler + scale → won"]
+        }
+      }
+    },
+    {
+      "step": 6,
+      "heading": "Hype, stochastic parrots & emergent behavior",
+      "remember": "LLMs only optimize **likely next tokens** — yet at scale, outputs are often **correct**; that gap is called **emergent** capability and still surprises experts.",
+      "points": [
+        "**2023** — public shock at ChatGPT; then backlash (e.g. **“Stochastic Parrots”** paper): warning not to treat statistical text as guaranteed truth.",
+        "Not surprising: realistic **plausible** continuations (good “predictive text”).",
+        "Surprising: plausible tokens are often **factually right** (e.g. correct **math** answers) — **why it generalizes** still debated.",
+        "**Emergent intelligence** (informal): large networks → outputs **imitate** intelligent responses, not just fluent ones."
+      ]
+    },
+    {
+      "step": 7,
+      "heading": "Prompt engineering → everyday skill",
+      "remember": "**Prompt engineering** = crafting the **input sequence** (role, context, style, examples) so the **output tokens** match your task.",
+      "points": [
+        "Techniques: state the **task**, give **background**, specify **tone/format**, use few-shot examples.",
+        "Was briefly a high-paid specialty; now a normal skill with **ChatGPT**, **Claude**, etc.",
+        "Core for **AI engineers** — you design what goes into `messages` and system prompts."
+      ]
+    },
+    {
+      "step": 8,
+      "heading": "Copilots — human + LLM in the workflow",
+      "remember": "**Copilots** embed an LLM beside your work (**GitHub Copilot**, **Microsoft Copilot**) — automate drudge tasks and enrich documents/code collaboratively.",
+      "points": [
+        "A **product pattern**: LLM + editor/IDE + context from your file or app.",
+        "You stay in the loop: accept, edit, or reject suggestions (supervision again)."
+      ]
+    },
+    {
+      "step": 9,
+      "heading": "Context engineering",
+      "remember": "**Context engineering** = designing **everything in the input** (prompt + retrieved data + tool results) so the model’s next-token prediction fits the real task.",
+      "points": [
+        "Think beyond one clever sentence — whole **context window** is your lever (Part 2 §7).",
+        "Example: ticket prices must **appear in the input** if the answer must quote current fares.",
+        "Includes **tools** and **RAG** (later weeks) — still fundamentally better **input sequence** → better output."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Business data", "text": "Prices, policies, RAG" },
+          { "title": "→", "text": "" },
+          { "title": "Context", "text": "Full input sequence" },
+          { "title": "→", "text": "" },
+          { "title": "LLM", "text": "Next-token prediction" }
+        ]
+      }
+    },
+    {
+      "step": 10,
+      "heading": "Agentic AI & autonomy",
+      "remember": "**Agentic AI** ≈ an **LLM in a loop** with **tools** — the model chooses **what to do next** by writing tokens that trigger actions.",
+      "points": [
+        "**LLM controls the workflow** — may call other models, **tools**, or functions.",
+        "**LLM in a loop** — repeated calls; e.g. **Claude Code**, **GPT agent** (Day 3).",
+        "**Autonomy**: output tokens can include “next step” instructions — still **stateless** each HTTP call."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "LLM", "text": "Plan in tokens" },
+          { "title": "→", "text": "" },
+          { "title": "Tool", "text": "Browser, code, API" },
+          { "title": "→", "text": "" },
+          { "title": "Loop", "text": "Until task done" }
+        ]
+      }
+    },
+    {
+      "step": 11,
+      "heading": "What are parameters?",
+      "remember": "**Parameters** are the learned numbers inside the network — classic ML used tens; modern LLMs use **millions to trillions**.",
+      "points": [
+        "Traditional ML: ~**20–200 parameters** for credit scoring from ~20–30 features.",
+        "**Deep learning**: millions or billions of weighted connections; tuned during **training**.",
+        "Deeper video explainers in course resources if you want more."
+      ]
+    },
+    {
+      "step": 12,
+      "heading": "Parameter growth & “more with less”",
+      "remember": "Historically **more parameters** ≈ more capability — **better training** now beats older giants at smaller sizes.",
+      "points": [
+        "Milestones: **GPT-1** ~117M → **GPT-2** ~1.5B → **GPT-3** ~175B → **GPT-4** ~1.76T (reported; frontier counts often **undisclosed**).",
+        "**Gemma** ~270M can outperform **GPT-2** despite fewer parameters.",
+        "Tiers: **GPT-5** nano/mini/full; **Claude** Haiku/Sonnet/Opus — larger ≈ more parameters ≈ higher cost."
+      ],
+      "visual": {
+        "type": "scale",
+        "caption": "Approximate public sizes (log scale)",
+        "rows": [
+          { "model": "Gemma (small)", "params": "~270M" },
+          { "model": "GPT-2", "params": "~1.5B" },
+          { "model": "Llama 3.1", "params": "~8B" },
+          { "model": "GPT-3", "params": "~175B" },
+          { "model": "DeepSeek", "params": "~671B" }
+        ]
+      }
+    },
+    {
+      "step": 13,
+      "heading": "Training-time scaling",
+      "remember": "**Training-time scaling** = bigger model + more training data — expensive upfront, stored in the weights.",
+      "points": [
+        "**Chinchilla scaling laws**: balance **parameter count** and **training tokens**.",
+        "Bigger models cost more to **train** and usually more per token to **run**.",
+        "Open-weight examples: **Llama**, **GPT OSS**, **DeepSeek**."
+      ]
+    },
+    {
+      "step": 14,
+      "heading": "Inference-time scaling",
+      "remember": "**Inference-time scaling** = smarter behavior **at run time** — reasoning, richer **context**, **RAG**, tools (no retrain).",
+      "points": [
+        "Examples: **reasoning models**, **budget forcing** (`wait`), facts in the **input**.",
+        "Combine with training-time scaling: large model + strong context setup.",
+        "**MoE** (mixture of experts): huge total parameters; only some experts fire per token."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Two capability levers",
+        "left": {
+          "label": "Training-time",
+          "bad": false,
+          "lines": ["More parameters", "More training data", "Higher train & run cost"]
+        },
+        "right": {
+          "label": "Inference-time",
+          "bad": false,
+          "lines": ["Reasoning / CoT", "Context · RAG · tools", "Pay per richer calls"]
+        }
+      }
+    }
+  ],
+  "cheatSheet": [
+    "GPT = Generative · Pre-trained · Transformer",
+    "Transformer = self-attention · parallel training",
+    "API = stateless · full messages[] each call",
+    "Agentic AI = LLM loop + tools",
+    "Scaling = training-time (size) vs inference-time (context/reasoning)",
+    "→ Continue Day 4 (2/2)"
+  ]
+}

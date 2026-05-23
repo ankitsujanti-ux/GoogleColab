@@ -1,0 +1,51 @@
+{
+  "id": "week2-day2",
+  "title": "Day 2 — Gradio UIs",
+  "summary": "`Interface` · streaming with `yield` · model dropdown · brochure in UI.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Wrap LLM logic in **Gradio** — quick demos with **`Interface`**, streaming, and model selection.",
+      "points": [
+        "Lab: `week2/day2.ipynb` · ties to Week 1 Day 5 brochure logic."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Gradio Interface",
+      "remember": "`gr.Interface(fn, inputs, outputs).launch()` — `fn` is plain Python mapping input → output.",
+      "points": [
+        "`share=True` creates a **public URL** — don't use with secrets.",
+        "`auth=(user, pass)` for basic protection."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Streaming callback",
+      "remember": "Use **`yield`** inside generator: accumulate `stream=True` chunks → yield partial text for typewriter UI.",
+      "code": "def stream_gpt(prompt):\n    result = \"\"\n    for chunk in openai.chat.completions.create(..., stream=True):\n        result += chunk.choices[0].delta.content or \"\"\n        yield result"
+    },
+    {
+      "step": 4,
+      "heading": "Model dropdown",
+      "remember": "`gr.Dropdown` routes to GPT vs Claude stream functions — same UI, different backend.",
+      "points": [
+        "Demo training cutoff: ask \"today's date\" — model may be wrong (no live web in base API)."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Brochure in Gradio",
+      "remember": "`stream_brochure(company, url, model)` — Week 1 pipeline behind a button + `gr.Markdown` output.",
+      "points": [
+        "`examples=[[...]]` pre-fills demo inputs for stakeholders."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "Interface(fn, inputs, outputs).launch()",
+    "Streaming = generator + yield",
+    "Dropdown routes to different models"
+  ]
+}

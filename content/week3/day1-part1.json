@@ -1,0 +1,84 @@
+{
+  "id": "week3-day1-part1",
+  "title": "Week 3 Day 1 (1/2) — Hugging Face & Ollama",
+  "summary": "Part 1 of 2 · What HF is (hub + libraries) vs Ollama · six libraries you'll use.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Week 3 goal",
+      "remember": "Move from **frontier APIs only** to **open-source models** you load and run yourself — mainly via **Hugging Face** and **Google Colab** GPUs.",
+      "points": [
+        "You already: frontier models, assistants, tools (Weeks 1–2).",
+        "This week: **pipelines**, **tokenizers**, **models**, multimodal (image, audio)."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Hugging Face = two things",
+      "remember": "**HF Hub** (website) hosts **models**, **datasets**, **Spaces** — separate from **HF Python libraries** that run the code.",
+      "points": [
+        "**Hub (platform):** browse/download artifacts at huggingface.co.",
+        "**Libraries:** open-source Python (PyTorch-first) to load weights, run, fine-tune **transformers**."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Hub", "text": "Models · datasets · Spaces" },
+          { "title": "→", "text": "" },
+          { "title": "Libraries", "text": "transformers · diffusers · …" }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "Ollama vs Hugging Face code",
+      "remember": "**Ollama** = packaged local app (GGUF, C++ server, OpenAI-compatible port). **HF** = real Python model code you can change and fine-tune.",
+      "points": [
+        "Ollama (Week 1): fast pre-baked runner — you don't edit the neural net.",
+        "HF `transformers`: load weights in Jupyter/Colab — inspect layers, swap tokenizers, **fine-tune** later.",
+        "Use Ollama for quick local chat; use HF when you need control or training."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "When to use which",
+        "left": {
+          "label": "Ollama",
+          "bad": false,
+          "lines": ["Packaged app", "OpenAI-style port", "Fast local chat"]
+        },
+        "right": {
+          "label": "HF transformers",
+          "bad": false,
+          "lines": ["Python + PyTorch", "Full model code", "Train / customize"]
+        }
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Six HF libraries (course map)",
+      "remember": "Package **`huggingface_hub`** downloads from the website Hub — confusing name, different from the site itself.",
+      "points": [
+        "**huggingface_hub** — login, download models/datasets from Hub.",
+        "**datasets** — efficient dataset objects.",
+        "**transformers** — models, tokenizers, **pipelines** (core this week).",
+        "**peft** — LoRA / efficient fine-tuning (Week 7).",
+        "**trl** — RL training for transformers.",
+        "**accelerate** — multi-GPU / distributed training."
+      ],
+      "visual": {
+        "type": "labs",
+        "rows": [
+          { "lab": "hub", "models": "Download from Hub", "product": "Now" },
+          { "lab": "datasets", "models": "Big data handling", "product": "W3+" },
+          { "lab": "transformers", "models": "Models + pipelines", "product": "W3 focus" },
+          { "lab": "peft / trl / accelerate", "models": "Train at scale", "product": "W7+" }
+        ]
+      }
+    }
+  ],
+  "cheatSheet": [
+    "HF Hub ≠ HF libraries (same brand, different layer)",
+    "Ollama = app runner · HF = code + weights",
+    "transformers is the main library this week"
+  ]
+}

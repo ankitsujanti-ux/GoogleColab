@@ -1,0 +1,73 @@
+{
+  "id": "week3-day4-part2",
+  "title": "Week 3 Day 4 (2/2) — Inside the transformer",
+  "summary": "Part 2 of 2 · Embedding · decoder layers · LM head · attention · nonlinearity.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "High-level stack (Llama 3.2 ~1B)",
+      "remember": "**Embedding** → **N decoder layers** → **LM head** — each row in `print(model)` is part of this tree.",
+      "points": [
+        "**Embedding:** token ID → vector (e.g. 2048-dim); **RoPE** encodes position.",
+        "**Decoder layers:** self-attention + MLP + layer norm (×16 for 3.2 1B; ×32 for larger 3.1).",
+        "**LM head:** hidden state → logits over **vocab size** (~128k) = next-token probabilities."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Token IDs", "text": "Input" },
+          { "title": "→", "text": "" },
+          { "title": "Embed + layers", "text": "Mix information" },
+          { "title": "→", "text": "" },
+          { "title": "LM head", "text": "Next-token logits" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Inside one decoder layer",
+      "remember": "**Self-attention** (Q, K, V, O) decides what prior context matters; **MLP** blends features with a **nonlinearity** in the gate.",
+      "points": [
+        "Attention: from *Attention Is All You Need* — query/key/value learned weights.",
+        "MLP: up-project (e.g. 2048→8192) → gate + **SiLU** → down-project back.",
+        "**Layer norm:** keeps activations stable (math trickery)."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Why nonlinearity matters",
+      "remember": "Stacked **linear** layers collapse to one linear map — **ReLU/SiLU** in the gate makes deep parameters meaningful.",
+      "points": [
+        "Analogy: many audio mixers in series without distortion = one mixer.",
+        "Llama uses **SiLU** (smooth ReLU variant) — choice is somewhat empirical.",
+        "You don't need to derive this — intuition for reading `print(model)`."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Next-token prediction",
+      "remember": "Output is **one distribution over the whole vocab** per forward pass — generation loops: pick token → append → repeat (Day 5).",
+      "points": [
+        "LM head ≈ classifier over 128k classes.",
+        "Training improves weights; inference only runs this stack.",
+        "Optional: `TextStreamer` when generating (Day 5)."
+      ],
+      "visual": {
+        "type": "tokens",
+        "caption": "One forward pass → probabilities for every possible next token",
+        "tokens": [
+          { "text": "input", "color": "#dbeafe" },
+          { "text": "→", "color": "#e5e7eb" },
+          { "text": "logits", "color": "#fef3c7" },
+          { "text": "→", "color": "#e5e7eb" },
+          { "text": "pick 1", "color": "#dcfce7" }
+        ]
+      }
+    }
+  ],
+  "cheatSheet": [
+    "Embed → decoder×N → LM head",
+    "Attention = what to focus on · MLP = mix + SiLU",
+    "Output = next-token distribution over vocab"
+  ]
+}

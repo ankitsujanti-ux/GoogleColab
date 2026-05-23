@@ -92,6 +92,46 @@ function renderVisual(v) {
           </div>
         </div>`;
 
+    case "scale":
+      return `
+        <div class="visual visual-labs" role="img" aria-label="Model parameter scale">
+          ${v.caption ? `<p class="visual-caption">${escapeHtml(v.caption)}</p>` : ""}
+          <table class="labs-table">
+            <thead><tr><th>Model</th><th>Parameters (approx.)</th></tr></thead>
+            <tbody>
+              ${(v.rows || [])
+                .map(
+                  (r) => `
+                <tr>
+                  <td><strong>${escapeHtml(r.model)}</strong></td>
+                  <td>${escapeHtml(r.params)}</td>
+                </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>`;
+
+    case "labs":
+      return `
+        <div class="visual visual-labs" role="img" aria-label="Major frontier labs">
+          <table class="labs-table">
+            <thead><tr><th>Lab</th><th>Models</th><th>Chat product</th></tr></thead>
+            <tbody>
+              ${(v.rows || [])
+                .map(
+                  (r) => `
+                <tr>
+                  <td><strong>${escapeHtml(r.lab)}</strong></td>
+                  <td>${escapeHtml(r.models)}</td>
+                  <td>${escapeHtml(r.product)}</td>
+                </tr>`
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>`;
+
     case "compare":
       return `
         <div class="visual visual-compare" role="img" aria-label="${escapeHtml(v.title || "Comparison")}">

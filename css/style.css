@@ -486,6 +486,36 @@ body {
   color: var(--text-muted);
 }
 
+.labs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.labs-table th,
+.labs-table td {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.labs-table th {
+  background: var(--paper);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.labs-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .labs-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .visual-compare .compare-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -19,18 +19,20 @@
 
 ---
 
-## Publish / update notes
+## Publish / update notes (one click)
 
-From PowerShell:
+**Double-click** `PUSH.bat` in the `learning-portal` folder (or run in terminal).
+
+- Username: `ankitsujanti-ux`
+- Password: a **Personal Access Token** ([create here](https://github.com/settings/tokens) — enable **repo** scope)
+- Wait ~1 minute after success, then open the live URL above.
+
+Or in PowerShell:
 
 ```powershell
 cd c:\Users\Ankit.Sujantee\projects\llm_engineering\learning-portal
-.\publish.ps1
+git push -u origin main
 ```
-
-- First time: Git may ask you to sign in to GitHub.
-- Wait ~1 minute, then open the live URL above.
-- Bookmark that URL — use it from any device.
 
 ---
 

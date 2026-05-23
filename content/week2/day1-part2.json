@@ -1,0 +1,55 @@
+{
+  "id": "week2-day1-part2",
+  "title": "Week 2 Day 1 (2/2) — LiteLLM, caching, multi-bot",
+  "summary": "Part 2 of 2 · LiteLLM costs · prompt caching · LangChain peek · two-model loop.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "LiteLLM",
+      "remember": "`litellm.completion(model=\"gemini/...\", messages=...)` — unified call + **usage/cost** metadata.",
+      "points": [
+        "Use when you want one interface and billing visibility across vendors."
+      ],
+      "code": "from litellm import completion\nresponse = completion(model=\"openai/gpt-4.1\", messages=question)"
+    },
+    {
+      "step": 2,
+      "heading": "Prompt caching",
+      "remember": "Put **long static** content first (policy, Hamlet, docs) · **variable** user question last — repeat calls cache the prefix → cheaper.",
+      "points": [
+        "Enterprise pattern: big system doc + small user delta.",
+        "Order matters: static before dynamic."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Static", "text": "Cached prefix" },
+          { "title": "→", "text": "" },
+          { "title": "Variable", "text": "New question" }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "heading": "LangChain (light touch)",
+      "remember": "`ChatOpenAI(model=...).invoke(messages)` — heavy framework; course shows it briefly; **raw API is fine** for most work.",
+      "points": [
+        "Know it exists; don't assume you must use it in production."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Multi-bot loop",
+      "remember": "Two models alternate — rebuild full **`messages`** each turn with different **system** prompts + entire history.",
+      "points": [
+        "Debate, simulation, role-play — cost grows with every turn (full context resent).",
+        "Pitfall: optional keys missing → skip that provider."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "LiteLLM for cross-vendor + cost",
+    "Cache: long static first, user last",
+    "Multi-bot = full messages history each call"
+  ]
+}

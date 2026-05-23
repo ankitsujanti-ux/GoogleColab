@@ -1,7 +1,7 @@
 {
   "id": "week1-day3",
-  "title": "Day 3 — Base, Chat, Reasoning & Hybrid Models",
-  "summary": "Read Step 1 → 6 in order. No lab today — this day is model types and when to use each.",
+  "title": "Day 3 — Model types & frontier labs",
+  "summary": "Read Step 1 → 14 in order. §1 model types · §2 frontier labs · §3 product demos (deep research, agents, Claude Code).",
   "sections": [
     {
       "step": 1,
@@ -110,13 +110,175 @@
           ]
         }
       }
+    },
+    {
+      "step": 7,
+      "heading": "Frontier & foundation models — the major labs",
+      "remember": "**Frontier** / **foundation model** = large general-purpose LLM from a major lab; terms are often used interchangeably (no strict official definition).",
+      "points": [
+        "**OpenAI** — **GPT-5** (hybrid); **o-series** (reasoning); **GPT 4.1** (pure **chat**, often faster than GPT-5 even at low reasoning); **OSS** (open-weight). Chat product: **ChatGPT**.",
+        "**Anthropic** — **Claude** sizes: **Haiku** (small), **Sonnet** (mid, common in course), **Opus** (large). Chat: Claude app.",
+        "**Google** — **Gemini** (e.g. 2.5; newer versions over time). Chat: **Gemini**.",
+        "**xAI** — **Grok** model + Grok chat (spelled with **k**, not Groq the inference company).",
+        "**DeepSeek** — Chinese lab; standout because flagship models are **open source**; chat: **DeepSeek**."
+      ],
+      "visual": {
+        "type": "labs",
+        "rows": [
+          { "lab": "OpenAI", "models": "GPT-5, o-series, GPT 4.1, OSS", "product": "ChatGPT" },
+          { "lab": "Anthropic", "models": "Claude Haiku / Sonnet / Opus", "product": "Claude" },
+          { "lab": "Google", "models": "Gemini", "product": "Gemini" },
+          { "lab": "xAI", "models": "Grok", "product": "Grok" },
+          { "lab": "DeepSeek", "models": "DeepSeek (open source)", "product": "DeepSeek" }
+        ]
+      }
+    },
+    {
+      "step": 8,
+      "heading": "What frontier models do well",
+      "remember": "Strong at **synthesis**, **structured answers**, **content drafts**, and **coding** — especially when a skilled human supervises.",
+      "points": [
+        "**Summarize & synthesize** — e.g. webpage summaries from earlier labs; long, structured Q&A and pros/cons.",
+        "**Generate content** — emails, presentations, project outlines; good starting point for new ideas.",
+        "**Code** — write, test, fix in loops; largely replaced Stack Overflow for many developers.",
+        "Often fixes hard bugs quickly with clear explanations — when the problem is in their knowledge."
+      ]
+    },
+    {
+      "step": 9,
+      "heading": "Rough edges — cutoff, hallucination, tooling",
+      "remember": "Models predict **plausible** next tokens — so they can be **wrong but confident**; training has a **knowledge cutoff** unless extra tools are added.",
+      "points": [
+        "**Knowledge gaps** — expert in some domains, weak or outdated in others (may insist on old model names like GPT-3.5).",
+        "**Knowledge cutoff** — training data ends at a date; no built-in knowledge of events after that.",
+        "**Web search in ChatGPT** = **product engineering** (tools/RAG), not the raw LLM weights knowing the live web.",
+        "**Hallucination** — confident false outputs; dangerous for **juniors** who cannot spot bad code; **seniors** get more value because they review and challenge."
+      ]
+    },
+    {
+      "step": 10,
+      "heading": "Supervision — root cause beats band-aids",
+      "remember": "Treat the LLM like a tireless **junior analyst**: you must review, keep it on track, and fix wrong assumptions — especially in coding.",
+      "points": [
+        "LLMs often **patch forward** instead of stepping back to the real root cause.",
+        "**Example (course story):** Hugging Face call used **base** model name instead of **instruct/chat** variant → chat `system`/`user` format failed → assistant LLM generated pages of “convert to chat” code instead of fixing the **model id**.",
+        "Lesson: wrong model type (Step 2–3) looks like a hard problem; fix the name first.",
+        "Your job as **AI engineer**: supervise outputs; validate; don’t ship auto-generated tangents blindly."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Root cause vs band-aid",
+        "left": {
+          "label": "Band-aid (wrong)",
+          "bad": true,
+          "lines": [
+            "Used base model + chat prompts",
+            "LLM adds special-token hacks",
+            "Pages of unnecessary code"
+          ]
+        },
+        "right": {
+          "label": "Root cause (right)",
+          "bad": false,
+          "lines": [
+            "Switch to instruct/chat model id",
+            "Same messages format works",
+            "Minimal fix"
+          ]
+        }
+      }
+    },
+    {
+      "step": 11,
+      "heading": "Deep Research (agentic pattern)",
+      "remember": "**Deep Research** = the product runs many steps for you (read sources, synthesize) — you feel **autonomy**: work continues while you do something else.",
+      "points": [
+        "ChatGPT **Deep Research** browses many sources (e.g. 12+), cites links (TechCrunch, etc.), outputs a long **markdown** report.",
+        "Early **agentic** use case: not one prompt → one reply; a **workflow** runs in the background.",
+        "Output may reflect **bias in the task** (e.g. report ranked tech AI companies, not every commercial user of LLMs).",
+        "Still verify claims — same supervision mindset as Step 10."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Your task", "text": "Research question" },
+          { "title": "→", "text": "" },
+          { "title": "Agent loop", "text": "Search · read · cite" },
+          { "title": "→", "text": "" },
+          { "title": "Report", "text": "Markdown + sources" }
+        ]
+      }
+    },
+    {
+      "step": 12,
+      "heading": "Multimodal — image generation",
+      "remember": "**Multimodal** products also **generate images** (separate from text-only chat) — quality and creativity vary by model (e.g. **DALL·E 3** vs newer image models).",
+      "points": [
+        "Demo: absurd prompt (“rainbows… Hawaii to 17”) → image; may be **literal** unless you prompt for style.",
+        "Runs **in parallel** with Deep Research — multiple chats/tasks at once.",
+        "Familiar tools: **GPT** image gen, **Midjourney**, etc. — same frontier ecosystem, different modality."
+      ]
+    },
+    {
+      "step": 13,
+      "heading": "Agent mode — browser & real-world actions",
+      "remember": "**Agent mode** goes further: controls a **browser**, searches the web, checks sites, and can offer to **complete actions** (e.g. book a table) — not just text.",
+      "points": [
+        "Example task: NYC restaurant, **British** food, **banoffee pie** on menu, **9 p.m.** availability — agent navigates sites (e.g. **Resy**), moves the mouse, verifies menu and slots.",
+        "Uses **tools** behind the chat UI (browser, search) — stronger “something is working for me” than chat alone.",
+        "Can end with: “I can **book** this for you” — human must approve before real-world commits.",
+        "Failures happen (cookies, wrong page) — agent recovers and continues; still supervise outcomes."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Goal", "text": "Restaurant + criteria" },
+          { "title": "→", "text": "" },
+          { "title": "Browser agent", "text": "Search · verify · Resy" },
+          { "title": "→", "text": "" },
+          { "title": "Result", "text": "Link + optional booking" }
+        ]
+      }
+    },
+    {
+      "step": 14,
+      "heading": "Claude Code — coding agent in your repo",
+      "remember": "**Claude Code** = **Claude Sonnet** (frontier model) + **agent loop** on your filesystem — reads notebooks, writes runnable code (e.g. **`solution.py`** with **uv**).",
+      "points": [
+        "Demo: read `week1/day1` + `day2` notebooks → implement day 2 challenge as **`solution.py`** using **Ollama/Llama** (local base URL) instead of OpenAI.",
+        "One-shot style: understands scraper + summarizer pattern, **messages**, snarky system prompt — you run `uv run solution.py` with a URL.",
+        "Same theme as course labs, but the **agent** plans, edits files, and iterates — preview of **agentic AI** you build later in the course.",
+        "Lesson: powerful for seniors who review; same risks as Step 10 if you accept code blindly."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Chat vs coding agent",
+        "left": {
+          "label": "Chat only",
+          "bad": false,
+          "lines": [
+            "Text in / text out",
+            "You copy code manually",
+            "No file or terminal access"
+          ]
+        },
+        "right": {
+          "label": "Claude Code",
+          "bad": false,
+          "lines": [
+            "Reads repo notebooks",
+            "Writes solution.py",
+            "You run & verify locally"
+          ]
+        }
+      }
     }
   ],
   "cheatSheet": [
-    "Base — next-token completion only (predictive text)",
-    "Chat / Instruct — system + user + assistant; RLHF → ChatGPT",
-    "Reasoning — thinking trace, then answer; stronger, slower",
-    "Hybrid — auto reasoning effort; budget forcing with wait",
-    "Use base to fine-tune · chat for speed/creative · reasoning for hard problems"
+    "S1 — Base · Chat/Instruct · Reasoning · Hybrid",
+    "S2 — Frontier labs · strengths · limits · supervise",
+    "S3 — Deep Research = multi-step cited reports",
+    "S3 — Agent mode = browser + tools + optional actions",
+    "S3 — Claude Code = repo-aware coding agent (Sonnet + files)"
   ]
 }

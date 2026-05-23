@@ -1,0 +1,189 @@
+{
+  "id": "week1-day4-part2",
+  "title": "Day 4 (2/2) — Tokens, lab & API costs",
+  "summary": "Part 2 of 2 · Steps 1–13 · §4–§7 + `day4.ipynb`. Start with **Day 4 (1/2)** if you haven't.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "How tokenization evolved",
+      "remember": "Modern LLMs use **subword tokens** — between **character** vocab (tiny, hard) and **word** vocab (huge, OOV).",
+      "points": [
+        "**Character-level** — ~100 symbols; network must learn spelling **and** meaning together.",
+        "**Word-level** — vocab explodes; rare words dropped.",
+        "**Subword / BPE** — fragments of words; fixed vocab; can represent rare terms via pieces."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Characters", "text": "~100 vocab" },
+          { "title": "→", "text": "" },
+          { "title": "Words", "text": "Huge vocab" },
+          { "title": "→", "text": "" },
+          { "title": "Subwords", "text": "Tokens today" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Why subword tokens work",
+      "remember": "Tokens are an **engineering compromise** — fast, bounded vocab, match **stems + suffixes** in English.",
+      "points": [
+        "Could use chars or giant dicts; **subwords won** on speed and learning.",
+        "**Stem pattern**: `play` + `ing` / `ed` — network reuses roots.",
+        "Rare names split into fragments instead of `<UNK>`."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "Token ID vs embedding vector",
+      "remember": "First input to the model = **token ID** (integer). **Embedding vectors** are created **inside** the network — not the same thing.",
+      "points": [
+        "text → **tokenizer** → IDs → model maps to **embeddings** internally.",
+        "Generation: predict next **token ID**, then decode to text.",
+        "Vectors covered in later weeks."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Text", "text": "Your prompt" },
+          { "title": "→", "text": "" },
+          { "title": "Token IDs", "text": "Integers" },
+          { "title": "→", "text": "" },
+          { "title": "Embeddings", "text": "Inside model" }
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Tokenizer UI — common English",
+      "remember": "On **platform.openai.com/tokenizer**, common words often map **one word → one token**; tokenizer varies slightly by model.",
+      "points": [
+        "Colored **space + word** = token encodes **start of new word** (leading space is part of the token).",
+        "Pick the model in the dropdown when investigating — small differences, usually not critical."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Word-start vs word-piece tokens",
+      "remember": "**` important`** (with leading space) ≠ **`unimportant`** pieces — word-start vs middle/end fragments.",
+      "points": [
+        "**`crafted`** without leading space = suffix token reused in `handcrafted`, `witchcraft`.",
+        "Helps training; not a strict linguistic rule, just efficient BPE."
+      ]
+    },
+    {
+      "step": 6,
+      "heading": "Rare words & token ratios",
+      "remember": "Rare text → **more tokens**; rule of thumb **~4 characters/token**, **~750 words per 1,000 tokens**; **code** costs more tokens.",
+      "points": [
+        "**Pi**: often 3-digit chunks (~1000 dedicated tokens in GPT vocab).",
+        "**Shakespeare** ~900k words ≈ **~1.2M tokens** → why pricing is **per million tokens**.",
+        "Measure with tokenizer UI or **tiktoken** — don't guess for production."
+      ]
+    },
+    {
+      "step": 7,
+      "heading": "Before the lab",
+      "remember": "Theory above · practice in **Steps 8–9** (`week1/day4.ipynb`) · memory concept in **Part 1 Step 4**.",
+      "points": [
+        "UI: **platform.openai.com/tokenizer**",
+        "Code: **`tiktoken`** then **OpenAI API** memory demo"
+      ]
+    },
+    {
+      "step": 8,
+      "heading": "§6 Lab — Part 1: `tiktoken` (cells 1–4)",
+      "remember": "**`encode` / `decode` = local lookup** — no API call or API key for this section.",
+      "points": [
+        "Kernel **`.venv`** · `encoding_for_model(\"gpt-4.1-mini\")` (**chat** model).",
+        "Loop: print each **token ID** and `decode([id])` — **banoffee** → `ban` + `offee`.",
+        "`decode([326])` → **`and`**."
+      ],
+      "code": "import tiktoken\nencoding = tiktoken.encoding_for_model(\"gpt-4.1-mini\")\ntokens = encoding.encode(\"Hi my name is Ed and I like banoffee pie\")\nfor token_id in tokens:\n    print(f\"{token_id} = {encoding.decode([token_id])}\")"
+    },
+    {
+      "step": 9,
+      "heading": "§6 Lab — Part 2: memory illusion (cells 5–18)",
+      "remember": "Proves **Part 1 Step 4**: full **`messages`** (with **assistant** turn) required for follow-up questions.",
+      "points": [
+        "Call 2 without history → doesn't know your name.",
+        "Call 3 with full thread → *Your name is Ed*.",
+        "**Checklist:** stateless · full conversation each time · illusion of memory · next-token prediction · more tokens = higher bill."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Notebook vs Part 1 Step 4",
+        "left": {
+          "label": "Call 2",
+          "bad": true,
+          "lines": ["No Ed in messages", "I don't know your name"]
+        },
+        "right": {
+          "label": "Call 3",
+          "bad": false,
+          "lines": ["Full thread incl. assistant", "Answer: Ed"]
+        }
+      }
+    },
+    {
+      "step": 10,
+      "heading": "Context window",
+      "remember": "**Context window** = max **tokens** the model can consider at once (input + generated output so far) — includes **full conversation**, not just your last message.",
+      "points": [
+        "Exceed the limit → request **fails** (“context too long”).",
+        "During generation, each new token is appended; the **entire sequence** is re-fed until completion — all of it must fit.",
+        "Uses: long **RAG** dumps, **few-shot** examples, **Claude Code** filling the window.",
+        "**Shakespeare** (~1.2M tokens) needs ~1M window — mainly **Gemini** class models today."
+      ],
+      "visual": {
+        "type": "scale",
+        "caption": "Example context limits (check providers for current values)",
+        "rows": [
+          { "model": "Gemini 2.5 Flash", "params": "~1M tokens" },
+          { "model": "GPT-5", "params": "~400k tokens" },
+          { "model": "Claude", "params": "~200k tokens" },
+          { "model": "GPT OSS", "params": "~130k tokens" }
+        ]
+      }
+    },
+    {
+      "step": 11,
+      "heading": "API costs — how billing works",
+      "remember": "**ChatGPT subscription ≠ API billing** — API is **pay-per-use** (input + output tokens); builds **your own product** on frontier models.",
+      "points": [
+        "Prices fund **inference compute** (trillions of ops per call) + amortized training cost.",
+        "Charged per **input tokens** + **output tokens** (listed as **$/million tokens**).",
+        "**Catch 1:** input = **entire** `messages` thread + RAG + few-shot — grows every turn (you want that compute).",
+        "**Catch 2:** **reasoning / thinking tokens** count as **output** even when hidden (e.g. some **o-series** / internal traces)."
+      ]
+    },
+    {
+      "step": 12,
+      "heading": "Example prices & scale",
+      "remember": "**GPT-5** (example from **Vellum** leaderboard): ~$1.25 / 1M **input**, ~$10 / 1M **output** — a full Shakespeare-sized **output** ≈ $10; tiny prompts cost fractions of a cent.",
+      "points": [
+        "Compare models: [vellum.ai/llm-leaderboard](https://www.vellum.ai/llm-leaderboard) — context window + API cost columns (Week 4 goes deeper).",
+        "**GPT-5 nano**: ~$0.05 / 1M input, ~$0.40 / 1M output — cheap experiments.",
+        "At **product scale**: model unit economics per user; for **learning**: single calls are usually very cheap.",
+        "**Prompt caching**: repeat identical prefix within minutes → cheaper input (OpenAI automatic; Claude varies)."
+      ]
+    },
+    {
+      "step": 13,
+      "heading": "Day 4 wrap-up",
+      "remember": "You now have foundations: **transformers**, **tokens**, **context window**, **stateless API**, **costs**, **agentic** preview.",
+      "points": [
+        "Can call **OpenAI** and **Llama/Ollama**, summarize pages, compare frontier models.",
+        "Understand **memory illusion** and why **context engineering** matters.",
+        "**Week 1 ahead:** **Chat Completions** fluency, one-shot prompting, **streaming**, markdown/JSON, quick **business** build (Day 5)."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "Subword tokens · ID ≠ vector · tiktoken lab",
+    "Context window = all input + output in flight",
+    "API $/M input + output · reasoning tokens bill too",
+    "Vellum leaderboard · nano models for cheap tests",
+    "Part 1 = architecture & scaling"
+  ]
+}

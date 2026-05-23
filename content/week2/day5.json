@@ -1,0 +1,60 @@
+{
+  "id": "week2-day5",
+  "title": "Day 5 — Multimodal & Blocks",
+  "summary": "DALL·E · TTS · tool loop + rich UI with `gr.Blocks`.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Extend tool-calling chat with **images** (DALL·E) and **speech** (TTS) in a custom **Blocks** layout.",
+      "points": [
+        "Lab: `week2/day5.ipynb`."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "DALL·E 3",
+      "remember": "`openai.images.generate` — ~$0.04/image in lab notes · `response_format=\"b64_json\"` for notebook display.",
+      "points": [
+        "Marketing drafts — always human review before production."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "TTS",
+      "remember": "`openai.audio.speech.create(model=\"gpt-4o-mini-tts\", voice=\"onyx\", input=text)` — returns audio bytes.",
+      "points": [
+        "Contrast Week 3: open-source TTS on Colab vs this paid API."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Combined chat pipeline",
+      "remember": "Tool loop for facts → text reply → optional **city image** + **read-aloud** — latency stacks (LLM + image + audio).",
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Chat + tools", "text": "Facts" },
+          { "title": "→", "text": "" },
+          { "title": "DALL·E", "text": "Image" },
+          { "title": "→", "text": "" },
+          { "title": "TTS", "text": "Audio" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "gr.Blocks",
+      "remember": "Custom layout: **Chatbot** + **Image** + **Audio** — chain events: `message.submit(...).then(chat, ...)`.",
+      "points": [
+        "Three Gradio levels: **Interface** → **ChatInterface** → **Blocks**.",
+        "Week 2 exercise: full technical Q&A with Gradio + streaming + optional tools/audio."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "images.generate · audio.speech.create",
+    "Blocks = layout + event chains",
+    "Interface < ChatInterface < Blocks"
+  ]
+}

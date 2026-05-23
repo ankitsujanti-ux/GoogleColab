@@ -1,0 +1,89 @@
+{
+  "id": "week3-day2-part1",
+  "title": "Week 3 Day 2 (1/2) — Pipelines API",
+  "summary": "Part 1 of 2 · High vs low HF API · training vs inference · Colab discipline.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Two levels of HF code",
+      "remember": "**Pipelines** = high-level, one-liner tasks. **Tokenizers + models** = low-level control (Days 3–5).",
+      "points": [
+        "Pipelines wrap tokenizer + model + post-processing for common jobs.",
+        "Lower level: you choose model, tensors, `generate()` — more power, more steps."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "API levels",
+        "left": {
+          "label": "Pipelines",
+          "bad": false,
+          "lines": ["Quick inference", "Pre-built tasks", "Today"]
+        },
+        "right": {
+          "label": "Models + tokenizers",
+          "bad": false,
+          "lines": ["Full control", "Training / custom", "Days 3–5"]
+        }
+      }
+    },
+    {
+      "step": 2,
+      "heading": "How pipelines work",
+      "remember": "Create once with `pipeline(task=..., device=\"cuda\")` — then **call** the object like a function on many inputs.",
+      "points": [
+        "Optional `model=\"org/name\"` from Hub; else HF picks a default.",
+        "`device=\"cuda\"` on Colab T4 · Mac local: `device=\"mps\"`.",
+        "Inference only — model already trained."
+      ],
+      "code": "from transformers import pipeline\n\nanalyzer = pipeline(\"sentiment-analysis\", device=\"cuda\")\nresult = analyzer(\"I am excited to learn LLMs!\")"
+    },
+    {
+      "step": 3,
+      "heading": "Training vs inference",
+      "remember": "**Training** fits billions of weights on huge data. **Inference** runs the fixed model on **new** input — all pipeline labs are inference.",
+      "points": [
+        "GPT = **pre-trained** once (expensive); you usually only **infer**.",
+        "Pipelines = inference API for business tasks (classify, summarize, translate)."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Phases",
+        "left": {
+          "label": "Training",
+          "bad": false,
+          "lines": ["Learn weights", "Huge data + GPU farms", "Once per model"]
+        },
+        "right": {
+          "label": "Inference",
+          "bad": false,
+          "lines": ["Run trained model", "Your prompt / audio / image", "This week"]
+        }
+      }
+    },
+    {
+      "step": 4,
+      "heading": "Colab setup (day 2)",
+      "remember": "Pin versions when upstream breaks labs — e.g. `pip install -q --upgrade datasets==3.6.0`.",
+      "points": [
+        "Reconnect **T4** · enable **HF_TOKEN** secret each notebook.",
+        "`!nvidia-smi` → Tesla T4, ~15GB.",
+        "Lab: `week3/day2.ipynb` (Colab link in repo)."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Colab troubleshooting",
+      "remember": "**CUDA required but not available** usually means Google moved you to **CPU** — not “install CUDA locally”.",
+      "points": [
+        "Fix: Runtime → **Disconnect and delete runtime** → reconnect T4 → rerun from top (pip installs first).",
+        "HF **warnings / deprecation**: noisy but often safe — note them if something fails later.",
+        "Don't spiral into random `pip install` chains."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "pipeline(task) → callable object",
+    "Inference = run pre-trained model",
+    "CUDA error on Colab → reconnect GPU, rerun from top"
+  ]
+}

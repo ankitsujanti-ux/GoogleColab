@@ -1,0 +1,77 @@
+{
+  "id": "week3-day2-part2",
+  "title": "Week 3 Day 2 (2/2) — Pipeline tasks",
+  "summary": "Part 2 of 2 · Sentiment, NER, Q&A, summarization, translation, zero-shot, text-gen.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Sentiment analysis",
+      "remember": "`pipeline(\"sentiment-analysis\", device=\"cuda\")` — default model may misread sarcasm; swap **`model=`** from Hub.",
+      "points": [
+        "Example: positive label ~99.9% on clear praise.",
+        "\"I should be more excited\" → default may still say positive; try **star-rating** models (e.g. BERT-based).",
+        "Browse Hub → Models → filter **text classification**."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Named entity recognition (NER)",
+      "remember": "`task=\"ner\"` tags tokens as **PER**, **ORG**, **MISC**, etc.",
+      "points": [
+        "Subword tokenization can split words (e.g. \"hugging\" + \"face\").",
+        "Use case: extract product names from chat → lookup in DB (baby step toward **RAG**)."
+      ],
+      "code": "ner = pipeline(\"ner\", device=\"cuda\")\nfor ent in ner(\"AI engineers use Hugging Face in Colab\"):\n    print(ent)"
+    },
+    {
+      "step": 3,
+      "heading": "Question answering",
+      "remember": "Needs **question + context** — model finds answer span in context (not full RAG retrieval).",
+      "points": [
+        "`pipeline(\"question-answering\")` with `question=` and `context=`.",
+        "Pattern: NER on question → fetch context from DB → QA pipeline."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Summarization & translation",
+      "remember": "Small specialized models can summarize/translate **cheaply** vs one big frontier API — you own weights + code.",
+      "points": [
+        "`summarization` with `max_length`, `min_length`.",
+        "`translation_en_to_fr` (or other pairs via Hub model id).",
+        "Hub has filters for language and task."
+      ]
+    },
+    {
+      "step": 5,
+      "heading": "Zero-shot classification",
+      "remember": "**Zero-shot** = no training examples — you supply **label buckets** and the model scores each.",
+      "points": [
+        "`pipeline(\"zero-shot-classification\")` with `candidate_labels=[\"technology\", \"sports\", \"politics\"]`.",
+        "Useful for routing, tagging, triage."
+      ]
+    },
+    {
+      "step": 6,
+      "heading": "Text generation (GPT-2)",
+      "remember": "Default `text-generation` often uses **GPT-2** — old, **plausible but not truthful**; shows next-token imitation.",
+      "points": [
+        "Contrast with frontier models: quality comes from scale + training, not magic architecture alone.",
+        "Experiment: change `model=` on Hub for better open models."
+      ],
+      "visual": {
+        "type": "three-cards",
+        "cards": [
+          { "title": "Specialized", "text": "Small model, one task, fast/cheap" },
+          { "title": "Frontier API", "text": "One model, many tasks, paid" },
+          { "title": "Your choice", "text": "Cost, privacy, latency, quality" }
+        ]
+      }
+    }
+  ],
+  "cheatSheet": [
+    "Tasks: sentiment · ner · question-answering · summarization · translation · zero-shot-classification · text-generation",
+    "Always try different Hub model= ids",
+    "Small task models vs one GPT — tradeoff table"
+  ]
+}

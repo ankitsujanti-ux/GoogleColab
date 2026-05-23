@@ -1,0 +1,75 @@
+{
+  "id": "week3-day3-part1",
+  "title": "Week 3 Day 3 (1/2) — Tokenizers",
+  "summary": "Part 1 of 2 · Token vs token ID · special tokens · one tokenizer per model.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "What a tokenizer does",
+      "remember": "Models only see **numbers**. Tokenizer: **text → tokens → token IDs** (and reverse for decoding).",
+      "points": [
+        "**Token** = chunk (subword, word piece) — like colored spans in Week 1 UI.",
+        "**Token ID** = integer index in vocab (people often say \"token\" loosely).",
+        "Strict: token = piece · token ID = number."
+      ],
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "Text", "text": "Natural language" },
+          { "title": "→", "text": "" },
+          { "title": "Tokens", "text": "Chunks" },
+          { "title": "→", "text": "" },
+          { "title": "IDs", "text": "Integers in" }
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "heading": "Special tokens",
+      "remember": "Reserved IDs (BOS, EOS, chat headers) get meaning because **training data** always used them that way — not hard-coded slots in the transformer.",
+      "points": [
+        "Example: ID 10 at start of every prompt → model learns \"new prompt follows\".",
+        "Different models use different special token schemes.",
+        "`tokenizer.get_added_vocab()` / `.vocab` — inspect specials (Llama ~128k + extras)."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "One tokenizer per model",
+      "remember": "Never mix tokenizer A with model B — each release ships its own vocab and chat format.",
+      "points": [
+        "Course examples: Llama, Phi, DeepSeek, Qwen — each has its own tokenizer.",
+        "Slightly different token counts per tokenizer is normal; don't obsess for cost.",
+        "**Tokens ≠ embeddings:** IDs go in; **embedding layer** maps ID → vector (e.g. 2048-dim) deeper in the net."
+      ]
+    },
+    {
+      "step": 4,
+      "heading": "Base vs instruct models",
+      "remember": "**Base** = general continuation. **Instruct / chat** = fine-tuned on system/user/assistant turns.",
+      "points": [
+        "Hub names often include `-Instruct` or `-chat`.",
+        "Chat models need **`apply_chat_template`** — base models don't expect OpenAI JSON."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Model types",
+        "left": {
+          "label": "Base",
+          "bad": false,
+          "lines": ["Continue text", "No chat format", "Fine-tune base"]
+        },
+        "right": {
+          "label": "Instruct",
+          "bad": false,
+          "lines": ["Chat turns", "Special headers", "Use in assistants"]
+        }
+      }
+    }
+  ],
+  "cheatSheet": [
+    "text → tokens → token IDs",
+    "Special tokens = learned from training patterns",
+    "Match tokenizer to model · base ≠ instruct"
+  ]
+}

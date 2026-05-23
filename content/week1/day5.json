@@ -1,0 +1,75 @@
+{
+  "id": "week1-day5",
+  "title": "Day 5 — Multi-step brochure & streaming",
+  "summary": "JSON mode · link picking · chained LLM calls · `stream=True`.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Today's goal",
+      "remember": "Build a **company brochure** app: LLM picks links → scrape pages → second LLM writes brochure — plus **streaming** UI.",
+      "points": [
+        "Lab: `week1/day5.ipynb` · early **agentic** pattern (multiple LLM steps)."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Fetch links",
+      "remember": "`fetch_website_links(url)` returns `<a href>` targets — raw material for step 1.",
+      "points": [
+        "openai.com and heavy JS sites may scrape poorly (noted in lab)."
+      ]
+    },
+    {
+      "step": 3,
+      "heading": "JSON mode",
+      "remember": "`response_format={\"type\": \"json_object\"}` + **`json.loads()`** — model must return parseable JSON (show shape in prompt).",
+      "points": [
+        "Step 1: LLM returns **relevant links** as JSON.",
+        "Invalid JSON → fix prompt with one-shot example of exact structure."
+      ],
+      "code": "response = openai.chat.completions.create(\n    model=MODEL,\n    messages=[...],\n    response_format={\"type\": \"json_object\"},\n)\nlinks = json.loads(response.choices[0].message.content)"
+    },
+    {
+      "step": 4,
+      "heading": "Multi-step workflow",
+      "remember": "**Call 1** (links) → scrape selected URLs → **Call 2** (brochure) — each step is a separate API request.",
+      "visual": {
+        "type": "flow",
+        "steps": [
+          { "title": "URL", "text": "Company site" },
+          { "title": "→", "text": "" },
+          { "title": "LLM 1", "text": "Pick links (JSON)" },
+          { "title": "→", "text": "" },
+          { "title": "LLM 2", "text": "Brochure MD" }
+        ]
+      }
+    },
+    {
+      "step": 5,
+      "heading": "Prompt control",
+      "remember": "**System prompt** sets tone (professional vs humorous) · truncate large paste e.g. `user_prompt[:5000]`.",
+      "points": [
+        "Sales one-pagers, investor briefs, onboarding packs."
+      ]
+    },
+    {
+      "step": 6,
+      "heading": "Streaming",
+      "remember": "`stream=True` — loop `chunk.choices[0].delta.content` for typewriter effect in notebook UI.",
+      "code": "stream = openai.chat.completions.create(..., stream=True)\nresponse = \"\"\nfor chunk in stream:\n    response += chunk.choices[0].delta.content or \"\""
+    },
+    {
+      "step": 7,
+      "heading": "Exercise pointer",
+      "remember": "Week 1 exercise: technical Q&A with **GPT + Ollama + streaming** — combines Days 1, 2, 5.",
+      "points": [
+        "Notebook: `week1/week1 EXERCISE.ipynb` (skeleton — you implement cells)."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "JSON mode for structured link list",
+    "Chain: links LLM → scrape → brochure LLM",
+    "stream=True for live output"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "week3-day4-part1",
+  "title": "Week 3 Day 4 (1/2) — Models & quantization",
+  "summary": "Part 1 of 2 · `AutoModelForCausalLM` · 4-bit NF4 · load pattern · model zoo.",
+  "sections": [
+    {
+      "step": 1,
+      "heading": "Low-level Hugging Face",
+      "remember": "Today you run what **pipelines** wrapped: **`AutoTokenizer`** + **`AutoModelForCausalLM`** + **`generate()`**.",
+      "points": [
+        "**Causal LM** = autoregressive next-token model (the usual chat LLM).",
+        "PyTorch code in `model` object — `print(model)` shows layers.",
+        "Lab: `week3/day4.ipynb` · accept Meta license for Llama on Hub."
+      ]
+    },
+    {
+      "step": 2,
+      "heading": "Quantization",
+      "remember": "**Quantization** stores weights in fewer bits (e.g. **4-bit NF4**) → less VRAM, small quality drop — better than deleting most weights.",
+      "points": [
+        "16/32-bit weights → 4-bit ≈ ~4× memory savings; math is simpler on GPU.",
+        "**NF4** maps 4 bits to a floating-point range (not just integers 0–15).",
+        "Libraries: **`bitsandbytes`**, **`accelerate`**."
+      ],
+      "visual": {
+        "type": "compare",
+        "title": "Precision tradeoff",
+        "left": {
+          "label": "Full precision",
+          "bad": false,
+          "lines": ["More VRAM", "Best quality", "Huge models"]
+        },
+        "right": {
+          "label": "4-bit quant",
+          "bad": false,
+          "lines": ["Fits T4/Colab", "Slight quality loss", "Course default"]
+        }
+      }
+    },
+    {
+      "step": 3,
+      "heading": "BitsAndBytesConfig",
+      "remember": "Pass **`quantization_config`** into `from_pretrained` — model downloads full weights then loads quantized into RAM.",
+      "code": "from transformers import BitsAndBytesConfig\n\nquant_config = BitsAndBytesConfig(\n    load_in_4bit=True,\n    bnb_4bit_quant_type=\"nf4\",\n    bnb_4bit_use_double_quant=True,\n)\n\nmodel = AutoModelForCausalLM.from_pretrained(\n    model_id,\n    quantization_config=quant_config,\n    device_map=\"auto\",\n)"
+    },
+    {
+      "step": 4,
+      "heading": "Standard inference pattern",
+      "remember": "Almost every open-source chat run: **pad_token = eos_token** → **apply_chat_template** → **`.to(\"cuda\")`** → **generate**.",
+      "points": [
+        "`tokenizer.pad_token = tokenizer.eos_token` — avoids padding errors on many models.",
+        "`return_tensors=\"pt\"` for PyTorch tensors.",
+        "Models compared in lab: **Llama 3.2**, **Phi**, **Gemma 3 270M**, **Qwen3**, **DeepSeek-R1 distilled** (reasoning)."
+      ],
+      "code": "inputs = tokenizer.apply_chat_template(\n    messages,\n    return_tensors=\"pt\",\n    add_generation_prompt=True,\n).to(\"cuda\")"
+    },
+    {
+      "step": 5,
+      "heading": "Create model + tensors",
+      "remember": "`inputs` is a dict (e.g. `input_ids`) on GPU — **`model.generate(**inputs)`** runs the forward loop.",
+      "points": [
+        "Small Llama 3.2 ~1B + 4-bit may use ~1GB VRAM after load.",
+        "First run downloads from Hub (slow); rerun is faster.",
+        "No Llama access? Skip Llama cells; run Phi/Gemma/Qwen."
+      ]
+    }
+  ],
+  "cheatSheet": [
+    "AutoModelForCausalLM = causal / autoregressive LLM",
+    "BitsAndBytesConfig 4-bit NF4 for Colab",
+    "pad_token = eos_token · apply_chat_template · cuda"
+  ]
+}
