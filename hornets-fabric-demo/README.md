@@ -1,7 +1,7 @@
 # Hornets × Microsoft Fabric — Interactive Demo
 
 An interactive, self-contained dashboard demo showing how Microsoft Fabric complements
-Snowflake + Power BI for the Charlotte Hornets (Fan 360, Ticketing & Revenue, and a live
+Databricks + Power BI for the Charlotte Hornets (Fan 360, Ticketing & Revenue, and a live
 Smart Venue command center). All figures are simulated sample data for illustration.
 
 ## How to view it
