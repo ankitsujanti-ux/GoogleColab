@@ -137,6 +137,45 @@
 
   footer{max-width:1220px;margin:0 auto;padding:18px 22px 40px;color:var(--muted);font-size:11.5px;border-top:1px solid var(--line)}
   .mini{font-size:11px;color:var(--muted);margin-top:8px}
+
+  /* Buzz Back — fan feedback + merch reward */
+  .buzz-hero{background:linear-gradient(135deg,#1D1160 0%,#172440 45%,#00788C 100%);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:16px;position:relative;overflow:hidden}
+  .buzz-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(229,74,36,.25)}
+  .buzz-hero h2{margin:0 0 4px;font-size:24px;position:relative;z-index:1}
+  .buzz-hero p{margin:0;font-size:13.5px;opacity:.9;max-width:640px;position:relative;z-index:1}
+  .buzz-hero .tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+  .stars{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+  .star-btn{width:48px;height:48px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:22px;cursor:pointer;transition:transform .12s,border-color .12s,background .12s}
+  .star-btn:hover{transform:translateY(-2px);border-color:var(--blue60)}
+  .star-btn.on{border-color:var(--orange);background:#fff4f0;transform:scale(1.06)}
+  .chip-pick{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 2px}
+  .chip-pick button{border:1.5px solid var(--line);background:#fff;padding:8px 14px;border-radius:22px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink);transition:all .12s}
+  .chip-pick button:hover{border-color:var(--blue60)}
+  .chip-pick button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .fb-field{margin:12px 0}
+  .fb-field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+  .fb-field textarea,.fb-field input,.fb-field select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:13.5px;background:#fff;resize:vertical}
+  .fb-field textarea:focus,.fb-field input:focus,.fb-field select:focus{outline:none;border-color:var(--blue)}
+  .reward-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:700px){.reward-grid{grid-template-columns:1fr}}
+  .reward-card{border:2px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;background:#fff;transition:all .15s;text-align:center;position:relative}
+  .reward-card:hover{border-color:var(--blue60);transform:translateY(-2px)}
+  .reward-card.picked{border-color:var(--orange);background:#fff8f5;box-shadow:0 0 0 3px rgba(229,74,36,.15)}
+  .reward-card .emoji{font-size:42px;line-height:1;margin-bottom:8px}
+  .reward-card .rt{font-weight:800;font-size:15px}
+  .reward-card .rd{font-size:12px;color:var(--muted);margin-top:4px}
+  .reward-card .brand{margin-top:10px;font-size:10.5px;font-weight:700;color:var(--teal);letter-spacing:.3px}
+  .reward-card .check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--orange);color:#fff;display:none;place-items:center;font-size:12px;font-weight:800}
+  .reward-card.picked .check{display:grid}
+  .confetti-wrap{position:relative;overflow:hidden}
+  .win-banner{background:linear-gradient(90deg,var(--teal),var(--purple));color:#fff;border-radius:14px;padding:20px;text-align:center;display:none}
+  .win-banner.show{display:block;animation:fade .35s ease}
+  .win-banner .big{font-size:28px;font-weight:800;margin:6px 0}
+  .win-banner .code{display:inline-block;background:rgba(255,255,255,.18);padding:8px 16px;border-radius:8px;font-weight:800;letter-spacing:2px;margin-top:10px;font-size:16px}
+  .buzz-steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .buzz-steps span{font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;background:#e8ecf5;color:var(--muted)}
+  .buzz-steps span.on{background:var(--orange);color:#fff}
+  .buzz-steps span.done{background:var(--green);color:#fff}
 </style>
 </head>
 <body>
@@ -156,6 +195,7 @@
   <div class="tabs-in">
     <button class="tab active" data-v="overview">Overview</button>
     <button class="tab" data-v="fan">Fan 360</button>
+    <button class="tab" data-v="feedback">Buzz Back · Win Merch</button>
     <button class="tab" data-v="ticket">Ticketing &amp; Revenue</button>
     <button class="tab" data-v="venue">Smart Venue · LIVE</button>
   </div>
@@ -195,8 +235,9 @@
       </div>
     </div>
 
-    <div class="grid g3">
+    <div class="grid g4">
       <div class="card"><span class="pill teal">USE CASE 1</span><h3 style="margin-top:8px">Fan 360</h3><p class="cap">See every fan as one person and personalize at scale.</p><div style="font-size:12.5px;color:var(--muted)">Sample impact: <b style="color:var(--ink)">+7.5% per-fan spend</b></div></div>
+      <div class="card"><span class="pill orange">BUZZ BACK</span><h3 style="margin-top:8px">Fan feedback → merch</h3><p class="cap">Fun in-app feedback with a magnet or cap reward that markets the brand.</p><div style="font-size:12.5px;color:var(--muted)">Sample impact: <b style="color:var(--ink)">3× more feedback</b></div></div>
       <div class="card"><span class="pill blue">USE CASE 2</span><h3 style="margin-top:8px">Ticketing &amp; Revenue</h3><p class="cap">Forecast demand, price smart, prevent no-shows.</p><div style="font-size:12.5px;color:var(--muted)">Sample impact: <b style="color:var(--ink)">+9.1% ticket yield</b></div></div>
       <div class="card"><span class="pill orange">USE CASE 3</span><h3 style="margin-top:8px">Smart Venue (Live)</h3><p class="cap">Run the building in real time — lines, staffing, stock.</p><div style="font-size:12.5px;color:var(--muted)">Sample impact: <b style="color:var(--ink)">−31% concession waits</b></div></div>
     </div>
@@ -258,6 +299,154 @@
         <div style="display:flex;align-items:center;gap:20px">
           <div id="donut"></div>
           <ul class="list" id="donleg" style="font-size:12.5px"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BUZZ BACK — FAN FEEDBACK + MERCH ============ -->
+  <section class="view" id="feedback">
+    <div class="buzz-hero">
+      <div class="tag">POWERED BY FABRIC · POWER APPS → ONELAKE → ACTIVATOR</div>
+      <h2>Buzz Back — tell us how tonight felt</h2>
+      <p>30 seconds. Tap your vibe, drop a note, pick a free thank-you gift. Your voice goes straight to the team — and you walk away with Hornets merch that keeps Buzz City on every fridge and every head.</p>
+    </div>
+
+    <div class="buzz-steps" id="buzzSteps">
+      <span class="on" data-step="1">1 · Rate the night</span>
+      <span data-step="2">2 · Pick a gift</span>
+      <span data-step="3">3 · Claim code</span>
+    </div>
+
+    <!-- STEP 1: feedback -->
+    <div id="buzzStep1">
+      <div class="grid g23">
+        <div class="card">
+          <h3>How was your night at Spectrum Center?</h3>
+          <p class="cap">Tap a face — no wrong answers.</p>
+          <div class="stars" id="moodStars">
+            <button type="button" class="star-btn" data-v="1" title="Rough">😤</button>
+            <button type="button" class="star-btn" data-v="2" title="Meh">😕</button>
+            <button type="button" class="star-btn" data-v="3" title="OK">🙂</button>
+            <button type="button" class="star-btn" data-v="4" title="Great">🤩</button>
+            <button type="button" class="star-btn" data-v="5" title="Unreal">🔥</button>
+          </div>
+          <div class="mini" id="moodLabel" style="margin-top:4px">Tap a vibe to start</div>
+
+          <div class="fb-field" style="margin-top:16px">
+            <label>What stood out? (tap all that apply)</label>
+            <div class="chip-pick" id="topicChips">
+              <button type="button" data-t="Food &amp; drinks">🍔 Food &amp; drinks</button>
+              <button type="button" data-t="Wait times">⏱️ Wait times</button>
+              <button type="button" data-t="Seats &amp; view">💺 Seats &amp; view</button>
+              <button type="button" data-t="App experience">📱 App</button>
+              <button type="button" data-t="Staff &amp; vibe">🙌 Staff &amp; vibe</button>
+              <button type="button" data-t="Merch">👕 Merch</button>
+              <button type="button" data-t="Safety">🛡️ Safety</button>
+              <button type="button" data-t="Parking">🅿️ Parking</button>
+            </div>
+          </div>
+
+          <div class="fb-field">
+            <label>Spill the tea (optional)</label>
+            <textarea id="fbComment" rows="3" placeholder="Ex: Hugo's Hive line was long at half, but the new City Edition jersey drop was 🔥"></textarea>
+          </div>
+
+          <div class="grid g2" style="gap:12px">
+            <div class="fb-field" style="margin:0">
+              <label>Section (optional)</label>
+              <select id="fbSection">
+                <option value="">Where were you sitting?</option>
+                <option>101–106 · Lower bowl</option>
+                <option>114–119 · Sideline</option>
+                <option>214–219 · Upper</option>
+                <option>Suites / Club</option>
+                <option>Concourse / standing</option>
+              </select>
+            </div>
+            <div class="fb-field" style="margin:0">
+              <label>First name (for your gift)</label>
+              <input id="fbName" type="text" placeholder="Jordan" maxlength="24" />
+            </div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="btn" id="fbContinue" type="button">Next — pick my free gift →</button>
+            <span class="mini" id="fbHint">Rate a vibe + pick at least one topic</span>
+          </div>
+        </div>
+
+        <div class="card" style="background:linear-gradient(180deg,#fff,#f4f8ff)">
+          <h3>Why fans love Buzz Back</h3>
+          <p class="cap">Not a survey. A 30-second thank-you loop.</p>
+          <ul class="list" style="font-size:13px">
+            <li class="nba"><div class="ic">⚡</div><div><div class="t">Takes under 30 seconds</div><div class="d">Emoji taps — no long forms</div></div></li>
+            <li class="nba"><div class="ic">🎁</div><div><div class="t">Instant merch thank-you</div><div class="d">Magnet or cap — pick yours</div></div></li>
+            <li class="nba"><div class="ic">📣</div><div><div class="t">You become walking brand</div><div class="d">Hornets logo on fridge &amp; streets</div></div></li>
+            <li class="nba"><div class="ic">🐝</div><div><div class="t">Team actually listens</div><div class="d">Feedback hits ops live via Fabric</div></div></li>
+          </ul>
+          <div class="mini" style="margin-top:12px">Demo note: in production this is a Power App / Hornets app screen → Fabric Eventstream → closed-loop to F&amp;B, CX, security.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: pick reward -->
+    <div id="buzzStep2" style="display:none">
+      <div class="card">
+        <h3>You earned a thank-you gift 🎉</h3>
+        <p class="cap">Pick one — both carry Hornets branding so Buzz City travels with you.</p>
+        <div class="reward-grid" id="rewardGrid">
+          <div class="reward-card" data-reward="magnet">
+            <div class="check">✓</div>
+            <div class="emoji">🧲</div>
+            <div class="rt">Buzz City Fridge Magnet</div>
+            <div class="rd">Die-cut Hornets logo · fridge &amp; locker ready. Every glance = brand recall at home.</div>
+            <div class="brand">CHARLOTTE HORNETS · OFFICIAL</div>
+          </div>
+          <div class="reward-card" data-reward="cap">
+            <div class="check">✓</div>
+            <div class="emoji">🧢</div>
+            <div class="rt">Hive Cap (snapback)</div>
+            <div class="rd">Teal / purple stitch · wearable billboard. You rock it — we get the free marketing.</div>
+            <div class="brand">CHARLOTTE HORNETS · OFFICIAL</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ghost" id="fbBack" type="button">← Back</button>
+          <button class="btn" id="fbClaim" type="button" disabled>Claim my gift →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: win -->
+    <div id="buzzStep3" style="display:none">
+      <div class="win-banner show confetti-wrap" id="winBanner">
+        <div style="font-size:40px">🐝🎉</div>
+        <div class="big" id="winTitle">You're in, Jordan!</div>
+        <div style="opacity:.95;font-size:14px;max-width:520px;margin:0 auto">Thanks for Buzzing Back. Your feedback is already queued for the game-ops team. Show this code at the Fan Experience desk (Main Lobby) or redeem in the app.</div>
+        <div class="code" id="winCode">BUZZ-XXXX</div>
+        <div style="margin-top:12px;font-size:13px" id="winGiftLine">Gift: Buzz City Fridge Magnet</div>
+        <div style="margin-top:14px;font-size:12px;opacity:.85">Valid tonight only · while supplies last · one per fan</div>
+      </div>
+      <div class="grid g2" style="margin-top:16px">
+        <div class="card">
+          <h3>What happens next</h3>
+          <p class="cap">For the fan</p>
+          <ul class="list" style="font-size:13px">
+            <li class="nba"><div class="ic">1</div><div><div class="t">Show code at Fan Experience desk</div><div class="d">Or scan QR in the Hornets app</div></div></li>
+            <li class="nba"><div class="ic">2</div><div><div class="t">Grab your magnet or cap</div><div class="d">Branded — free walking marketing for the club</div></div></li>
+            <li class="nba"><div class="ic">3</div><div><div class="t">Post &amp; tag @Hornets</div><div class="d">Optional — unlock +50 Buzz City Rewards pts</div></div></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>What the business gets</h3>
+          <p class="cap">For Hornets leadership (this pitch)</p>
+          <ul class="list" style="font-size:13px">
+            <li class="nba"><div class="ic">📥</div><div><div class="t">Live feedback into Fabric</div><div class="d">Power Apps → Eventstream → OneLake</div></div></li>
+            <li class="nba"><div class="ic">🎯</div><div><div class="t">Routed to the right team</div><div class="d">F&amp;B · CX · security · parking</div></div></li>
+            <li class="nba"><div class="ic">📣</div><div><div class="t">Merch = free brand reach</div><div class="d">Every magnet &amp; cap is outdoor advertising</div></div></li>
+          </ul>
+          <button class="btn ghost" id="fbReset" type="button" style="margin-top:10px">Try another fan response</button>
         </div>
       </div>
     </div>
@@ -486,6 +675,74 @@ function startLive(){
 }
 function stopLive(){ running=false; if(liveTimer)clearInterval(liveTimer); }
 el('playbtn').addEventListener('click',()=>{ if(running){stopLive(); el('playbtn').textContent='▶ Resume live feed';} else startLive(); });
+
+/* ================= BUZZ BACK — FAN FEEDBACK + MERCH ================= */
+const moodCopy={1:'Rough night — we hear you',2:'Meh… help us fix it',3:'Solid night',4:'Great vibes!',5:'Unreal 🔥'};
+let buzzMood=0, buzzTopics=new Set(), buzzReward=null;
+
+document.querySelectorAll('#moodStars .star-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    buzzMood=+b.dataset.v;
+    document.querySelectorAll('#moodStars .star-btn').forEach(x=>x.classList.toggle('on',+x.dataset.v===buzzMood));
+    el('moodLabel').textContent=moodCopy[buzzMood];
+  });
+});
+document.querySelectorAll('#topicChips button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.dataset.t;
+    if(buzzTopics.has(t)){buzzTopics.delete(t); b.classList.remove('on');}
+    else{buzzTopics.add(t); b.classList.add('on');}
+  });
+});
+document.querySelectorAll('#rewardGrid .reward-card').forEach(c=>{
+  c.addEventListener('click',()=>{
+    buzzReward=c.dataset.reward;
+    document.querySelectorAll('#rewardGrid .reward-card').forEach(x=>x.classList.toggle('picked',x===c));
+    el('fbClaim').disabled=false;
+  });
+});
+function setBuzzStep(n){
+  el('buzzStep1').style.display=n===1?'block':'none';
+  el('buzzStep2').style.display=n===2?'block':'none';
+  el('buzzStep3').style.display=n===3?'block':'none';
+  document.querySelectorAll('#buzzSteps span').forEach(s=>{
+    const sn=+s.dataset.step;
+    s.classList.toggle('on',sn===n);
+    s.classList.toggle('done',sn<n);
+  });
+}
+el('fbContinue').addEventListener('click',()=>{
+  if(!buzzMood || buzzTopics.size===0){
+    el('fbHint').textContent='👆 Tap a vibe and at least one topic first';
+    el('fbHint').style.color='var(--orange)';
+    return;
+  }
+  el('fbHint').style.color='';
+  setBuzzStep(2);
+});
+el('fbBack').addEventListener('click',()=>setBuzzStep(1));
+el('fbClaim').addEventListener('click',()=>{
+  if(!buzzReward) return;
+  const name=(el('fbName').value||'Fan').trim().split(/\s+/)[0];
+  const code='BUZZ-'+Math.random().toString(36).slice(2,6).toUpperCase();
+  const gift=buzzReward==='magnet'?'Buzz City Fridge Magnet':'Hive Cap (snapback)';
+  el('winTitle').textContent=`You're in, ${name}!`;
+  el('winCode').textContent=code;
+  el('winGiftLine').textContent=`Gift locked: ${gift} · Topics: ${[...buzzTopics].join(', ')} · Mood ${buzzMood}/5`;
+  setBuzzStep(3);
+});
+el('fbReset').addEventListener('click',()=>{
+  buzzMood=0; buzzTopics.clear(); buzzReward=null;
+  document.querySelectorAll('#moodStars .star-btn').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#topicChips button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#rewardGrid .reward-card').forEach(x=>x.classList.remove('picked'));
+  el('fbComment').value=''; el('fbName').value=''; el('fbSection').value='';
+  el('moodLabel').textContent='Tap a vibe to start';
+  el('fbClaim').disabled=true;
+  el('fbHint').textContent='Rate a vibe + pick at least one topic';
+  el('fbHint').style.color='';
+  setBuzzStep(1);
+});
 </script>
 </body>
 </html>
