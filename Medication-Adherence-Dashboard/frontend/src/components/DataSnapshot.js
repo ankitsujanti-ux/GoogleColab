@@ -4,7 +4,7 @@ import './DataSnapshot.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || '/api';
 const MEMBER_ID_COLS = ['Member ID', 'Member_ID'];
-const PREVIEW_COUNTDOWN_SEC = 10;
+const PREVIEW_COUNTDOWN_SEC = 30;
 
 function DataSnapshot() {
   const [filter, setFilter] = useState('all');

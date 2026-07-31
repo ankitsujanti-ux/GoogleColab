@@ -1,6 +1,9 @@
 # utils.py
 import logging
 import os
+import sys
+import zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -169,29 +172,160 @@ def route_to_clinician(
         path=path
     )
 
+def _sibling_csv_path(path: str) -> str:
+    return os.path.splitext(path)[0] + ".csv"
+
+
+def _purge_broken_openpyxl() -> None:
+    """Remove a partially-initialized openpyxl from sys.modules (common on some hosts)."""
+    mod = sys.modules.get("openpyxl")
+    if mod is None:
+        return
+    if getattr(mod, "load_workbook", None) is not None and getattr(mod, "__version__", None):
+        return
+    for key in list(sys.modules):
+        if key == "openpyxl" or key.startswith("openpyxl."):
+            del sys.modules[key]
+
+
+def _col_letters_to_index(letters: str) -> int:
+    n = 0
+    for ch in letters:
+        if not ("A" <= ch <= "Z"):
+            break
+        n = n * 26 + (ord(ch) - ord("A") + 1)
+    return max(n - 1, 0)
+
+
+def _read_xlsx_via_zip(path: str) -> pd.DataFrame:
+    """Stdlib-only .xlsx reader (sharedStrings + first sheet). Avoids broken openpyxl installs."""
+    ns = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    with zipfile.ZipFile(path, "r") as zf:
+        shared: List[str] = []
+        if "xl/sharedStrings.xml" in zf.namelist():
+            root = ET.fromstring(zf.read("xl/sharedStrings.xml"))
+            for si in root.findall("m:si", ns):
+                texts = [t.text or "" for t in si.findall(".//m:t", ns)]
+                shared.append("".join(texts))
+
+        sheet_name = "xl/worksheets/sheet1.xml"
+        if sheet_name not in zf.namelist():
+            sheets = sorted(
+                n for n in zf.namelist()
+                if n.startswith("xl/worksheets/sheet") and n.endswith(".xml")
+            )
+            if not sheets:
+                return pd.DataFrame()
+            sheet_name = sheets[0]
+
+        root = ET.fromstring(zf.read(sheet_name))
+        matrix: List[List[Any]] = []
+        for row in root.findall("m:sheetData/m:row", ns):
+            cells: Dict[int, Any] = {}
+            max_idx = -1
+            for c in row.findall("m:c", ns):
+                ref = c.get("r") or ""
+                letters = "".join(ch for ch in ref if ch.isalpha())
+                idx = _col_letters_to_index(letters) if letters else (max_idx + 1)
+                max_idx = max(max_idx, idx)
+                cell_type = c.get("t")
+                v_node = c.find("m:v", ns)
+                if v_node is None or v_node.text is None:
+                    val: Any = None
+                elif cell_type == "s":
+                    try:
+                        val = shared[int(v_node.text)]
+                    except Exception:
+                        val = v_node.text
+                elif cell_type == "inlineStr":
+                    is_node = c.find("m:is", ns)
+                    val = "".join(t.text or "" for t in (is_node.findall(".//m:t", ns) if is_node is not None else []))
+                else:
+                    raw = v_node.text
+                    try:
+                        val = float(raw) if raw is not None and "." in raw else int(raw) if raw is not None else None
+                    except Exception:
+                        val = raw
+                cells[idx] = val
+            if max_idx < 0:
+                matrix.append([])
+            else:
+                matrix.append([cells.get(i) for i in range(max_idx + 1)])
+
+    if not matrix:
+        return pd.DataFrame()
+    width = max(len(r) for r in matrix)
+    matrix = [r + [None] * (width - len(r)) for r in matrix]
+    headers = [
+        str(h).strip() if h is not None and str(h).strip() else f"col_{i}"
+        for i, h in enumerate(matrix[0])
+    ]
+    data = [dict(zip(headers, row)) for row in matrix[1:]]
+    return pd.DataFrame(data)
+
+
 def _read_excel_dataframe(path: str) -> pd.DataFrame:
-    """Read .xlsx robustly. Prefer pandas+openpyxl; fall back to openpyxl workbook API."""
-    try:
-        import openpyxl  # noqa: F401
-        # Some hosts ship a broken openpyxl without __version__; set a fallback for pandas checks.
-        if not getattr(openpyxl, "__version__", None):
-            openpyxl.__version__ = "3.1.5"
-    except Exception:
-        pass
-    try:
-        return pd.read_excel(path, engine="openpyxl")
-    except Exception as first_err:
-        logger.warning("pandas read_excel failed (%s); trying openpyxl load_workbook", first_err)
-        from openpyxl import load_workbook
-        wb = load_workbook(path, read_only=True, data_only=True)
-        ws = wb.active
-        rows = list(ws.iter_rows(values_only=True))
-        wb.close()
-        if not rows:
-            return pd.DataFrame()
-        headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
-        data = [dict(zip(headers, row)) for row in rows[1:]]
-        return pd.DataFrame(data)
+    """
+    Read patient data robustly.
+    Order: direct CSV path → pandas/openpyxl → load_workbook → stdlib zip → sibling CSV.
+    Sibling CSV exists for hosts where openpyxl imports are broken (Render).
+    """
+    csv_path = _sibling_csv_path(path)
+    errors: List[str] = []
+
+    if path.lower().endswith(".csv"):
+        return pd.read_csv(path, low_memory=False)
+
+    if os.path.isfile(path):
+        _purge_broken_openpyxl()
+        try:
+            import openpyxl  # noqa: F401
+            if not getattr(openpyxl, "__version__", None):
+                openpyxl.__version__ = "3.1.5"
+            return pd.read_excel(path, engine="openpyxl")
+        except Exception as first_err:
+            errors.append(f"pandas/openpyxl: {first_err}")
+            logger.warning("pandas read_excel failed (%s); trying alternate readers", first_err)
+            _purge_broken_openpyxl()
+
+        try:
+            from openpyxl import load_workbook
+            wb = load_workbook(path, read_only=True, data_only=True)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
+            wb.close()
+            if not rows:
+                return pd.DataFrame()
+            headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
+            data = [dict(zip(headers, row)) for row in rows[1:]]
+            return pd.DataFrame(data)
+        except Exception as second_err:
+            errors.append(f"load_workbook: {second_err}")
+            logger.warning("openpyxl load_workbook failed (%s); trying CSV/zip fallbacks", second_err)
+            _purge_broken_openpyxl()
+
+    # Prefer known-good CSV before the stdlib zip reader (zip headers can be wrong
+    # for some workbooks; CSV is shipped alongside patients.xlsx for Render).
+    if os.path.isfile(csv_path):
+        logger.warning("Falling back to CSV patient data at %s", csv_path)
+        return pd.read_csv(csv_path, low_memory=False)
+
+    if os.path.isfile(path):
+        try:
+            df = _read_xlsx_via_zip(path)
+            if not df.empty:
+                logger.info("Loaded Excel via stdlib zip reader (%d rows)", len(df))
+                return df
+            errors.append("zip reader returned empty")
+        except Exception as zip_err:
+            errors.append(f"zip: {zip_err}")
+            logger.warning("stdlib zip xlsx reader failed (%s)", zip_err)
+
+    raise RuntimeError(
+        "Failed to read patient data at {0} (csv={1}): {2}".format(
+            path, csv_path, " | ".join(errors) or "no readable source"
+        )
+    )
 
 
 def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
@@ -200,21 +334,30 @@ def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
     Uses EXCEL_PATH from config (set via .env). Ensures required columns exist
     before loading so schema changes are handled and high-risk detection keeps working.
     Returns empty DataFrame if file is missing (production-friendly: app still starts).
+    Falls back to sibling patients.csv when openpyxl cannot read the .xlsx (e.g. Render).
     """
     global _last_mtime, _cached_df
 
-    if not os.path.exists(EXCEL_PATH):
+    csv_path = _sibling_csv_path(EXCEL_PATH)
+    if not os.path.exists(EXCEL_PATH) and not os.path.exists(csv_path):
         _cached_df = pd.DataFrame()
         _last_mtime = None
         return pd.DataFrame()
     try:
-        ensure_excel_columns(EXCEL_PATH)
+        if os.path.exists(EXCEL_PATH) and EXCEL_PATH.lower().endswith((".xlsx", ".xlsm")):
+            ensure_excel_columns(EXCEL_PATH)
     except Exception as e:
         logger.warning("ensure_excel_columns skipped: %s", e)
-    mtime = os.path.getmtime(EXCEL_PATH)
+    mtimes = []
+    if os.path.exists(EXCEL_PATH):
+        mtimes.append(os.path.getmtime(EXCEL_PATH))
+    if os.path.exists(csv_path):
+        mtimes.append(os.path.getmtime(csv_path))
+    mtime = max(mtimes) if mtimes else None
     if force_reload or _cached_df is None or _last_mtime != mtime:
         try:
-            df = _read_excel_dataframe(EXCEL_PATH)
+            source = EXCEL_PATH if os.path.exists(EXCEL_PATH) else csv_path
+            df = _read_excel_dataframe(source)
         except Exception as e:
             logger.error("Failed to read Excel at %s: %s", EXCEL_PATH, e)
             raise
@@ -225,7 +368,7 @@ def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
         df = compute_fields(df)
         _cached_df = df
         _last_mtime = mtime
-        logger.info("Loaded %d patients from %s", len(df), os.path.basename(EXCEL_PATH))
+        logger.info("Loaded %d patients from %s", len(df), os.path.basename(source))
     return _cached_df.copy()
 
 def compute_fields(df: pd.DataFrame) -> pd.DataFrame:
