@@ -1,0 +1,54 @@
+.dashboard {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: var(--bg);
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 80fr 20fr;
+  gap: 16px;
+  padding: 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.dashboard-left,
+.dashboard-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Data Snapshot full-width row: same width as header (max 1600px) */
+.dashboard-snapshot-row {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* Agents Flow full-width row: below Data Snapshot */
+.dashboard-agents-flow-row {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .dashboard-right {
+    order: -1;
+  }
+  
+  .system-status {
+    position: relative;
+    top: 0;
+  }
+}

@@ -1,0 +1,10 @@
+.App {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: transparent;
+}
+
+/* Toast notifications are now handled by ToastNotification component */

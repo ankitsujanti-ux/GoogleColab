@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Frontend
+frontend/node_modules/
+# Keep frontend/build so cloud hosts can serve the UI without npm build
+
+# Data — keep sample patients.xlsx for demos; ignore temp Excel locks
+~$*.xlsx
+Data/~$*
+
+# Logs
+*.log

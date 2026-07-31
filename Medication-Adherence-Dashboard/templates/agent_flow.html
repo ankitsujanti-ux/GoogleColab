@@ -1,0 +1,110 @@
+<div style="border:1px solid #E2E8F0;border-radius:12px;background:#FFFFFF;margin-top:8px;overflow:hidden;">
+<details style="margin:0;" open>
+<summary style="cursor:pointer;list-style:revert;padding:14px 16px;font-weight:600;color:#0F172A;outline:none;user-select:none;">
+Agent Flow & Sequence
+</summary>
+<div style="padding:14px 16px; color:#334155; line-height:1.8; font-size:13px;">
+  <div style="margin-bottom:12px; font-weight:700; color:#0F172A; font-size:14px;">Autonomous Decision Pipeline</div>
+  
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+    <div style="display:flex; align-items:center; gap:10px; padding:10px; background:#F8FAFC; border-left:4px solid #1E40AF; border-radius:6px;">
+      <div style="flex-shrink:0; width:32px; height:32px; background:#1E40AF; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">1</div>
+      <div style="flex:1;">
+        <div style="font-weight:700; color:#0F172A; font-size:13px;">Data Quality Agent</div>
+        <div style="color:#64748B; font-size:12px; margin-top:2px;">Validates & normalizes patient records, checks consent flags, computes refill timing</div>
+      </div>
+    </div>
+    
+    
+<div style="display:flex; justify-content:center; color:#CBD5E1; font-size:18px; margin:-4px 0;">{arrow}</div>
+<div style="display:flex; align-items:center; gap:10px; padding:10px; background:#F8FAFC; border-left:4px solid #D97706; border-radius:6px;">
+  <div style="flex-shrink:0; width:32px; height:32px; background:#D97706; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">2</div>
+  <div style="flex:1;">
+    <div style="font-weight:700; color:#0F172A; font-size:13px;">Adherence Risk Agent</div>
+    <div style="color:#64748B; font-size:12px; margin-top:2px;">Assesses risk score (0–100), labels (High/Medium/Low), signals, confidence</div>
+  </div>
+</div>
+
+    
+    
+<div style="display:flex; justify-content:center; color:#CBD5E1; font-size:18px; margin:-4px 0;">{arrow}</div>
+<div style="display:flex; align-items:center; gap:10px; padding:10px; background:#F8FAFC; border-left:4px solid #9333EA; border-radius:6px;">
+  <div style="flex-shrink:0; width:32px; height:32px; background:#9333EA; color:white; 
+              display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;">3</div>
+  <div style="flex:1;">
+    <div style="font-weight:700; color:#0F172A; font-size:13px;">Escalation Decision Agent</div>
+    <div style="color:#64748B; font-size:12px; margin-top:2px;">Evaluates if patient requires clinician escalation based on risk thresholds and refill status</div>
+  </div>
+</div>
+
+    
+    
+<div style="display:flex; justify-content:center; color:#CBD5E1; font-size:18px; margin:-4px 0;">{arrow}</div>
+<div style="display:flex; align-items:center; gap:10px; padding:10px; background:#F8FAFC; border-left:4px solid #16A34A; border-radius:6px;">
+  <div style="flex-shrink:0; width:32px; height:32px; background:#16A34A; color:white; 
+              border-radius:50%; display:flex; align-items:center; justify-content:center; 
+              font-weight:700; font-size:14px;">4</div>
+  <div style="flex:1;">
+    <div style="font-weight:700; color:#0F172A; font-size:13px;">Orchestration Agent</div>
+    <div style="color:#64748B; font-size:12px; margin-top:2px;">Coordinates decision-making, routes to specialized agents, executes actions</div>
+  </div>
+</div>
+    
+ 
+<div style="margin-left:42px; display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+  <div style="display:flex; align-items:start; gap:8px; padding:8px; background:#F1F5F9; 
+              border-left:3px solid #64748B; border-radius:4px;">
+        <div style="color:#64748B; font-size:11px; font-weight:600; margin-top:2px;">4a</div>
+    <div style="flex:1;">
+      <div style="font-weight:600; color:#475569; font-size:12px;">Consent &amp; Routing Agent</div>
+      <div style="color:#94A3B8; font-size:11px; margin-top:1px;">Determines contact channel (SMS/Email/Pushover), validates consent</div>
+    </div>
+  </div>
+</div>
+
+      
+      
+<div style="margin-left:42px; display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+  <div style="display:flex; align-items:start; gap:8px; padding:8px; background:#F1F5F9;border-left:3px solid #64748B; border-radius:4px;">
+    <div style="color:#64748B; font-size:11px; font-weight:600; margin-top:2px;">4b</div>
+    <div style="flex:1;">
+      <div style="font-weight:600; color:#475569; font-size:12px;">Safety &amp; Throttling Agent</div>
+      <div style="color:#94A3B8; font-size:11px; margin-top:1px;">Enforces daily caps, per‑patient cooldowns, policy gates</div>
+    </div>
+  </div>
+</div>
+
+            
+<div style="margin-left:42px; display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+  <div style="display:flex; align-items:start; gap:8px; padding:8px; background:#F1F5F9;
+              border-left:3px solid #64748B; border-radius:4px;">
+    <div style="color:#64748B; font-size:11px; font-weight:600; margin-top:2px;">4c</div>
+    <div style="flex:1;">
+      <div style="font-weight:600; color:#475569; font-size:12px;">Messaging Agent</div>
+      <div style="color:#94A3B8; font-size:11px; margin-top:1px;">Generates personalized notification messages via AI</div>
+    </div>
+  </div>
+</div>
+
+    
+    
+<div style="display:flex; justify-content:center; color:#CBD5E1; font-size:18px; margin:-4px 0;">{arrow}</div>
+<div style="display:flex; align-items:center; gap:10px; padding:10px; 
+            background:#DCFCE7; border-left:4px solid #16A34A; border-radius:6px;">
+  <div style="flex-shrink:0; width:32px; height:32px; background:#16A34A; color:white; 
+              border-radius:50%; display:flex; align-items:center; justify-content:center; 
+              font-weight:700; font-size:14px;">5</div>
+  <div style="flex:1;">
+    <div style="font-weight:700; color:#0F172A; font-size:13px;">Audit &amp; Compliance Agent</div>
+    <div style="color:#64748B; font-size:12px; margin-top:2px;">Logs all decisions, tracks notification status, maintains audit trail for governance</div>
+  </div>
+</div>
+
+  
+  <div style="margin-top:14px; padding:10px; background:#E0E7FF; border-radius:6px; border-left:4px solid #1E40AF;">
+    <div style="font-weight:600; color:#1E40AF; font-size:12px; margin-bottom:4px;">🤖 Governance</div>
+    <div style="color:#475569; font-size:12px;">All 5 agents operate autonomously with policy gates, consent checks, and throttling limits. Decisions are logged for auditability.</div>
+  </div>
+</div>
+</details>
+</div>

@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: medication-adherence-dashboard
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: EXCEL_PATH
+        value: ./Data/patients.xlsx
+      - key: AUTO_REFRESH_SECONDS
+        value: "60"
+      - key: THRESHOLD_LOW
+        value: "50"
+      - key: THRESHOLD_MED
+        value: "80"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini

@@ -1,0 +1,15 @@
+flask>=3.0.0
+flask-cors>=4.0.0
+flask-socketio>=5.3.0
+pandas
+python-dotenv
+openpyxl
+requests
+openai
+plotly>=5.18.0
+python-socketio>=5.10.0
+eventlet>=0.33.3
+twilio>=8.0.0
+gunicorn>=21.0.0
+gevent>=24.0.0
+gevent-websocket>=0.10.1

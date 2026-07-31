@@ -1,0 +1,38 @@
+<style>
+  @keyframes slideIn {{
+    from {{ transform: translateY(-10px); opacity: 0; }}
+    to   {{ transform: translateY(0px); opacity: 1; }}
+  }}
+  @keyframes fadeOut {{
+    from {{ opacity: 1; }}
+    to   {{ opacity: 0; }}
+  }}
+</style>
+<div id="notif-{mid}" style="
+    position: fixed;
+    right: 18px;
+    top: 18px;
+    z-index: 99999;
+    background: {bg};
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+    font-family: Segoe UI, Inter, system-ui, -apple-system, Roboto, Arial;
+    font-size: 13px;
+    font-weight: 600;
+    max-width: 340px;
+    border-left: 5px solid {accent};
+    animation: slideIn 180ms ease-out;
+">
+  {icon} {label}: {first} {last}
+</div>
+<script>
+  setTimeout(function() {{
+    var el = document.getElementById("notif-{mid}");
+    if (el) {{
+      el.style.animation = "fadeOut 180ms ease-in";
+      setTimeout(function() {{ try {{ el.remove(); }} catch(e) {{}} }}, 190);
+    }}
+  }}, {toast_timeout_ms});
+</script>

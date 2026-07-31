@@ -1,0 +1,68 @@
+{
+  "name": "MedicationAdherence_AgentPipeline",
+  "description": "Scheduled pipeline: runs agent pipeline, high-risk alerts, and final report table every 60 minutes",
+  "activities": [
+    {
+      "name": "Step1_RunAgentPipeline",
+      "type": "NotebookActivity",
+      "description": "Run the full agent pipeline on patients table",
+      "notebook": {
+        "name": "02_run_agent_pipeline",
+        "path": "fabric_agents/02_run_agent_pipeline"
+      },
+      "timeout": "01:00:00",
+      "retryCount": 1,
+      "retryInterval": "00:05:00"
+    },
+    {
+      "name": "Step2_HighRiskAlerts",
+      "type": "NotebookActivity",
+      "description": "Send targeted notifications to high-risk patients",
+      "notebook": {
+        "name": "03_high_risk_alerts",
+        "path": "fabric_agents/03_high_risk_alerts"
+      },
+      "dependsOn": [
+        {
+          "activity": "Step1_RunAgentPipeline",
+          "dependencyConditions": ["Succeeded"]
+        }
+      ],
+      "timeout": "00:30:00",
+      "retryCount": 1,
+      "retryInterval": "00:05:00"
+    },
+    {
+      "name": "Step3_BuildFinalReport",
+      "type": "NotebookActivity",
+      "description": "Build the final report table for Power BI",
+      "notebook": {
+        "name": "04_build_final_report_table",
+        "path": "fabric_agents/04_build_final_report_table"
+      },
+      "dependsOn": [
+        {
+          "activity": "Step2_HighRiskAlerts",
+          "dependencyConditions": ["Succeeded"]
+        }
+      ],
+      "timeout": "00:15:00",
+      "retryCount": 1,
+      "retryInterval": "00:02:00"
+    }
+  ],
+  "schedule": {
+    "type": "Recurring",
+    "frequency": "Minute",
+    "interval": 60,
+    "startTime": "2026-03-17T00:00:00Z",
+    "timeZone": "India Standard Time",
+    "description": "Runs every 60 minutes (matches AUTO_REFRESH_SECONDS=60)"
+  },
+  "parameters": {},
+  "annotations": [
+    "medication-adherence",
+    "agent-pipeline",
+    "fabric"
+  ]
+}

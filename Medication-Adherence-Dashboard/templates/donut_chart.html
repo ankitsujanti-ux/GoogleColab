@@ -1,0 +1,84 @@
+<div id='$chart_id' style='width:100%;height:380px;background:transparent;border:1px solid var(--border);border-radius:12px;'></div>
+<script src='https://cdn.amcharts.com/lib/4/core.js'></script>
+<script src='https://cdn.amcharts.com/lib/4/charts.js'></script>
+<script>
+am4core.ready(function() {
+  var chart = am4core.create("$chart_id", am4charts.PieChart3D);
+  // Remove initial animation - chart appears immediately
+  chart.hiddenState.properties.opacity = 1;
+  chart.hiddenState.properties.visible = true;
+  chart.legend = new am4charts.Legend();
+  chart.legend.labels.template.fill = am4core.color('#64748B');
+  chart.legend.markers.template.stroke = am4core.color('#CBD5E1');
+  chart.innerRadius = 80;
+  chart.background.fillOpacity = 0;
+  // Disable initial animation
+  chart.initialZoomLevel = 1;
+  chart.zoomLevel = 1;
+
+  chart.data = [
+    { category: 'Low', value: $low_count, color: '#DC2626' },
+    { category: 'Medium', value: $med_count, color: '#D97706' },
+    { category: 'High', value: $high_count, color: '#16A34A' }
+  ];
+
+  var series = chart.series.push(new am4charts.PieSeries3D());
+  series.dataFields.value = 'value';
+  series.dataFields.category = 'category';
+  series.slices.template.tooltipText = "{category}: {value}";
+  series.tooltip.label.fontSize = 12;
+  series.slices.template.propertyFields.fill = "color";
+  series.slices.template.propertyFields.stroke = "color";
+  series.slices.template.fillOpacity = 1;
+  series.slices.template.strokeOpacity = 1;
+  series.slices.template.stroke = am4core.color('#FFFFFF');
+  series.slices.template.strokeWidth = 2;
+  series.tooltip.getFillFromObject = false;
+  series.tooltip.background.fillOpacity = 0.95;
+  // More informative hover (keep design & animation)
+  series.slices.template.tooltipText = "{category}: [bold]{value}[/] ({value.percent.formatNumber('#.0')}%)";
+  series.tooltip.label.fill = am4core.color("#0F172A");
+  series.tooltip.background.fill = am4core.color("#FFFFFF");
+  series.tooltip.background.stroke = am4core.color("#CBD5E1");
+  series.tooltip.background.strokeWidth = 1;
+  // Legend shows values too (more informative)
+  chart.legend.valueLabels.template.text = "{value.value}";
+  chart.legend.valueLabels.template.fill = am4core.color('#64748B');
+
+  // Enable hover interactions on slices
+  series.slices.template.interactionsEnabled = true;
+  series.slices.template.cursorOverStyle = am4core.MouseCursorStyle.pointer;
+  
+  // Simple hover state - just scale up the slice
+  var hoverState = series.slices.template.states.create('hover');
+  hoverState.properties.scale = 1.1;
+  hoverState.transitionDuration = 150;
+  hoverState.transitionEasing = am4core.ease.out;
+  
+  // Click state - slightly larger scale on click
+  var activeState = series.slices.template.states.create('active');
+  activeState.properties.scale = 1.15;
+  activeState.transitionDuration = 150;
+  activeState.transitionEasing = am4core.ease.out;
+  
+  // Enable click interactions
+  series.slices.template.events.on('hit', function(ev) {
+    var slice = ev.target;
+    if (slice.isActive) {
+      slice.isActive = false;
+    } else {
+      series.slices.each(function(item) {
+        item.isActive = false;
+      });
+      slice.isActive = true;
+    }
+  });
+
+  var label = chart.seriesContainer.createChild(am4core.Label);
+  label.text = "$interventions_30d Stabilized by AI";
+  label.horizontalCenter = 'middle';
+  label.verticalCenter = 'middle';
+  label.fontSize = 16;
+  label.fill = am4core.color('#0F172A');
+});
+</script>

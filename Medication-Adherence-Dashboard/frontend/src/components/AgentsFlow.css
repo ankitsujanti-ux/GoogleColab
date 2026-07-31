@@ -1,0 +1,327 @@
+/* Agents Flow - below Key Metrics; vertical pipeline; length until Data Snapshot */
+.agents-flow-section {
+  width: 100%;
+  min-height: 100px;
+  max-height: 420px;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  min-width: 0;
+}
+
+.agents-flow-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  min-width: 0;
+  overflow: auto;
+  min-height: 0;
+}
+
+.agents-flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agents-flow-header-toggle {
+  width: 100%;
+  padding: 12px 0;
+  margin: -4px 0 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.agents-flow-header-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.agents-flow-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agents-flow-chevron {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.25s ease;
+}
+
+.agents-flow-section-minimized .agents-flow-inner {
+  padding-bottom: 12px;
+}
+
+.agents-flow-header-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agents-flow-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.agents-flow-total {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  padding: 2px 8px;
+  background: rgba(30, 64, 175, 0.1);
+  border-radius: 6px;
+}
+
+.agents-flow-names-toggle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e40af;
+  background: transparent;
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.agents-flow-names-toggle:hover {
+  background: rgba(30, 64, 175, 0.1);
+}
+
+.agents-flow-all-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  animation: agentsFlowFadeIn 0.3s ease-out;
+}
+
+.agents-flow-name-chip {
+  font-size: 11px;
+  color: #334155;
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes agentsFlowFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.agents-flow-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.agents-flow-badge-on {
+  background: rgba(16, 185, 129, 0.15);
+  color: #047857;
+}
+
+.agents-flow-badge-off {
+  background: rgba(100, 116, 139, 0.2);
+  color: #64748b;
+}
+
+/* Vertical pipeline */
+.agents-flow-pipeline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  min-height: 48px;
+}
+
+.agents-flow-pipeline-vertical {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-height: 0;
+}
+
+.agents-flow-node {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #64748B;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  min-width: 0;
+}
+
+.agents-flow-node-animated {
+  animation: agentsFlowNodeIn 0.5s ease-out both;
+}
+
+@keyframes agentsFlowNodeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.agents-flow-node-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.agents-flow-node-number {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0;
+}
+
+.agents-flow-node-content .agents-flow-node-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.agents-flow-node-content > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.agents-flow-node-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.agents-flow-node-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+  display: block;
+}
+
+.agents-flow-subagents {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 34px;
+  margin-top: 4px;
+}
+
+.agents-flow-subnode {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #f1f5f9;
+  border-left: 3px solid #64748b;
+  border-radius: 4px;
+}
+
+.agents-flow-subnode-id {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.agents-flow-subnode-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  display: block;
+}
+
+.agents-flow-subnode-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 1px;
+  display: block;
+}
+
+.agents-flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: #94a3b8;
+}
+
+.agents-flow-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.agents-flow-arrow-vertical {
+  padding: 4px 0;
+}
+
+.agents-flow-arrow-vertical svg {
+  width: 24px;
+  height: 24px;
+}
+
+.agents-flow-arrow-animated {
+  animation: agentsFlowArrowPulse 0.5s ease-out both;
+}
+
+@keyframes agentsFlowArrowPulse {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.agents-flow-arrow-vertical svg {
+  animation: agentsFlowArrowBounce 2s ease-in-out infinite;
+}
+
+@keyframes agentsFlowArrowBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@media (max-width: 768px) {
+  .agents-flow-pipeline:not(.agents-flow-pipeline-vertical) {
+    gap: 8px;
+  }
+
+  .agents-flow-subagents {
+    margin-left: 12px;
+  }
+}

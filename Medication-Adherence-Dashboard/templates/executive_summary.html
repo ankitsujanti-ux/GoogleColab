@@ -1,0 +1,103 @@
+<!-- CSS for hover cards is loaded from styles.css -->
+<div class="card" style="margin-top:12px; padding:16px 20px; background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%); border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+  <div class="card-title" style="font-size:15px; margin-bottom:10px; font-weight:700; color: #0F172A;">📊 Executive Summary</div>
+  <div class="subtle" style="font-size:13px; line-height:1.6; color: #475569;">
+    The platform continuously monitored adherence risk, executed governed autonomous outreach, and projected clinically meaningful impact.
+    Average adherence is <b style="color: #0F172A;">{avg:.1f}%</b> {adh_dir} {adh_delta_text}.
+    High-risk cohort stands at <b style="color: #0F172A;">{hr_now:,}</b> {hr_dir} {hr_delta_text}.
+    Over the last 30 days, autonomous interventions were <b style="color: #0F172A;">{int_30d:,}</b> and today <b style="color: #0F172A;">{int_today:,}</b>.
+  </div>
+
+  <div style="margin-top:12px; padding:12px 14px; background: #F8FAFC; border:1px solid #E2E8F0; border-radius:10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+    <div style="font-weight:700; font-size:13px; color: #0F172A; margin-bottom:6px;">📈 What changed this week?</div>
+    <div class="subtle" style="line-height:1.6; font-size:12px; color: #475569;">
+      <div style="margin-bottom:4px;">• <b style="color: #0F172A;">{wow_high_risk:+,}</b> high-risk patients identified</div>
+      <div style="margin-bottom:4px;">• AI stabilized <b style="color: #0F172A;">{stabilized_wo_escalation_pct}%</b> without clinician escalation (proxy)</div>
+    <div><b style="color: #0F172A;">₹{wow_cost_avoid:,}</b> projected cost avoidance</div>
+    </div>
+  </div>
+
+  <div class="hover-cards-row" style="margin-top:10px;">
+    <div class="hover-card-group">
+      <span class="hover-card-button">Model Version</span>
+      <div class="hover-card-tooltip">
+        <div class="hover-card-tooltip-content">
+          <span class="hover-card-tooltip-label">Model</span>
+          <div class="hover-card-tooltip-main">
+            <span class="hover-card-tooltip-value">{model}</span>
+            <div class="hover-card-tooltip-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hover-card-svg">
+                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm.53 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v5.69a.75.75 0 0 0 1.5 0v-5.69l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="hover-card-tooltip-percent">Active</span>
+            </div>
+          </div>
+          <div class="hover-card-tooltip-divider"></div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Provider</span>
+            <span class="hover-card-tooltip-value-secondary">OpenAI</span>
+          </div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Status</span>
+            <span class="hover-card-tooltip-value-secondary">Operational</span>
+          </div>
+        </div>
+        <div class="hover-card-tooltip-arrow"></div>
+      </div>
+    </div>
+    <div class="hover-card-group">
+      <span class="hover-card-button">Governance Policy-gated</span>
+      <div class="hover-card-tooltip">
+        <div class="hover-card-tooltip-content">
+          <span class="hover-card-tooltip-label">Policy</span>
+          <div class="hover-card-tooltip-main">
+            <span class="hover-card-tooltip-value">Gated Outreach</span>
+            <div class="hover-card-tooltip-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hover-card-svg">
+                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm.53 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v5.69a.75.75 0 0 0 1.5 0v-5.69l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="hover-card-tooltip-percent">Enforced</span>
+            </div>
+          </div>
+          <div class="hover-card-tooltip-divider"></div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Throttling</span>
+            <span class="hover-card-tooltip-value-secondary">Active</span>
+          </div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Type</span>
+            <span class="hover-card-tooltip-value-secondary">Policy-gated</span>
+          </div>
+        </div>
+        <div class="hover-card-tooltip-arrow"></div>
+      </div>
+    </div>
+    <div class="hover-card-group">
+      <span class="hover-card-button">Consent</span>
+      <div class="hover-card-tooltip">
+        <div class="hover-card-tooltip-content">
+          <span class="hover-card-tooltip-label">Consent</span>
+          <div class="hover-card-tooltip-main">
+            <span class="hover-card-tooltip-value">Opt-in Required</span>
+            <div class="hover-card-tooltip-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hover-card-svg">
+                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm.53 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v5.69a.75.75 0 0 0 1.5 0v-5.69l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="hover-card-tooltip-percent">Verified</span>
+            </div>
+          </div>
+          <div class="hover-card-tooltip-divider"></div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Status</span>
+            <span class="hover-card-tooltip-value-secondary">Active</span>
+          </div>
+          <div class="hover-card-tooltip-row">
+            <span class="hover-card-tooltip-label-secondary">Type</span>
+            <span class="hover-card-tooltip-value-secondary">Explicit Consent</span>
+          </div>
+        </div>
+        <div class="hover-card-tooltip-arrow"></div>
+      </div>
+    </div>
+  </div>
+</div>
