@@ -331,6 +331,9 @@ def _default_dashboard_response(data_error: str = None):
             "notified_whatsapp": 0,
             "notified_sms": 0,
             "notified_email": 0,
+            "high_risk_refill_over": 0,
+            "refill_over_due_count": 0,
+            "appreciation_sent_count": 0,
         },
         "system": {
             "status": "Degraded" if data_error else "No data",
@@ -384,205 +387,34 @@ def get_dashboard_data():
         df["EventDate"] = pd.to_datetime(df["EventDate"], errors="coerce")
         df = df.sort_values("EventDate", ascending=False).drop_duplicates(subset=[member_id_col], keep="first").reset_index(drop=True)
 
-    # Detect high-risk patients
+    # Track data hash only. Do NOT run agent orchestration on this HTTP path —
+    # that blocks for minutes on ~2300 rows and breaks browsers (HTTP/2 protocol errors).
+    # Background BackendRunner handles live notifications separately.
     current_columns = sorted(df.columns.tolist())
-    data_hash = hashlib.md5(f"{str(current_columns)}|{len(df)}|{df[adherence_col].sum() if adherence_col in df.columns else 0}".encode()).hexdigest()
-    columns_changed = previous_columns_hash != current_columns
-    data_changed = previous_data_hash != data_hash
-    
-    if columns_changed or data_changed:
-        previous_columns_hash = current_columns
-        previous_data_hash = data_hash
-        
-        high_risk_patients = []
-        try:
-            clean_rows = []
-            for _, r in df.iterrows():
-                norm = validate_and_normalize_row(r)
-                clean_rows.append(norm['clean'])
-            
-            clean_df = pd.DataFrame(clean_rows) if clean_rows else pd.DataFrame()
-            
-            for _, row in clean_df.iterrows():
-                risk_assessment = assess_adherence_risk(dict(row))
-                adh = float(row.get(adherence_col, 0) or 0)
-                dur = row.get("days_until_refill")
-                dur = float(dur) if dur is not None and (isinstance(dur, (int, float)) or str(dur).replace(".", "").isdigit()) else None
-                refill_soon = dur is not None and dur <= 7
-                is_high_risk = (adh < THRESHOLD_LOW) and refill_soon
-                if is_high_risk:
-                    member_id = str(row.get("Member ID", ""))
-                    if member_id and member_id not in processed_high_risk_patients:
-                        high_risk_patients.append({
-                            "member_id": member_id,
-                            "row": dict(row),
-                            "risk": risk_assessment,
-                            "name": row.get("Patient Name", "Unknown")
-                        })
-            
-            # Process all patients for comprehensive analysis (not just high-risk)
-            today = pd.Timestamp.now().normalize()
-            notified_today_count = 0
-            if "NotificationSentOn" in df.columns and member_id_col in df.columns:
-                df["NotificationSentOn"] = pd.to_datetime(df["NotificationSentOn"], errors="coerce")
-                notified_today_count = int(df[df["NotificationSentOn"].dt.normalize() == today][member_id_col].astype(str).nunique())
-            
-            policy_context = {
-                "today_sent": notified_today_count,
-                "cap": int(os.getenv("OUTREACH_MAX_PER_DAY", "100")),
-                "cooldown_days": int(os.getenv("OUTREACH_COOLDOWN_DAYS", "2"))
-            }
-            
-            # Process high-risk patients
-            if high_risk_patients:
-                for patient in high_risk_patients:
-                    member_id = patient["member_id"]
-                    row = patient["row"]
-                    
-                    # Get previous state for comparison
-                    previous_state = patient_previous_states.get(member_id, {})
-                    
-                    last_sent_ts = None
-                    if "NotificationSentOn" in df.columns:
-                        patient_row = df[df[member_id_col].astype(str) == member_id]
-                        if not patient_row.empty and pd.notna(patient_row["NotificationSentOn"].iloc[0]):
-                            last_sent_ts = patient_row["NotificationSentOn"].iloc[0]
-                    
-                    policy_context["last_sent_ts"] = last_sent_ts
-                    result = orchestrate_refill_and_notify(row, send=send_auto_notifications, policy_context=policy_context, previous_state=previous_state)
-                    
-                    processed_high_risk_patients.add(member_id)
-                    
-                    # Store current state for next comparison
-                    patient_previous_states[member_id] = {
-                        "adherence": row.get("Adherence Percentage", 0),
-                        "days_until_refill": row.get("days_until_refill"),
-                        "risk_score": patient["risk"].get("risk_score", 0)
-                    }
-                    
-                    # Extract enhanced agent outputs
-                    care_routing = result.get("care_routing", {})
-                    care_needs = result.get("care_needs", {})
-                    appreciation = result.get("appreciation", {})
-                    sentiment_analysis = result.get("sentiment_analysis", {})
-                    
-                    actions = result.get("actions", [])
-                    needs_clinician = result.get("needs_clinician", False) or care_routing.get("needs_routing", False)
-                    escalation_reason = result.get("escalation_reason") or care_routing.get("routing_reason")
-                    
-                    status = result.get("status", "Planned")
-                    if status in {"Sent", "Queued"}:
-                        # Get route information for channel
-                        route = result.get("route", {})
-                        channel = route.get("channel", "notification")
-                        
-                        # Format channel name for display
-                        channel_display = {
-                            "sms": "SMS",
-                            "email": "Email",
-                            "pushover": "Notification",
-                            "whatsapp": "WhatsApp"
-                        }.get(channel, "Notification")
-                        
-                        # Get adherence percentage
-                        adherence = row.get("Adherence Percentage", row.get("Adeherence Percentage", 0))
-                        try:
-                            adherence_float = float(adherence) if adherence is not None and str(adherence).strip() not in ['', 'nan', 'None'] else 0
-                            adherence_pct = f"{adherence_float:.1f}%"
-                        except (ValueError, TypeError):
-                            adherence_pct = "N/A"
-                        
-                        # Split name into first and last
-                        first_name, last_name = name_parts(patient["name"])
-                        full_name_display = f"{first_name} {last_name}".strip() if last_name else first_name
-                        
-                        high_risk_notifications.append({
-                            "member_id": member_id,
-                            "name": patient["name"],
-                            "status": status,
-                            "risk_score": patient["risk"].get("risk_score", 0),
-                            "needs_clinician": needs_clinician,
-                            "escalation_reason": escalation_reason,
-                            "timestamp": datetime.now().isoformat()
-                        })
-                        socketio.emit('high_risk_alert', {
-                            "type": "high_risk",
-                            "member_id": member_id,
-                            "name": patient["name"],
-                            "first_name": first_name,
-                            "last_name": last_name,
-                            "full_name": full_name_display,
-                            "adherence_percentage": adherence_pct,
-                            "adherence_value": adherence,
-                            "channel": channel,
-                            "channel_display": channel_display,
-                            "status": status,
-                            "risk_score": patient["risk"].get("risk_score", 0),
-                            "needs_clinician": needs_clinician,
-                            "escalation_reason": escalation_reason,
-                            "care_routing": care_routing,
-                            "care_needs": care_needs,
-                            "sentiment": sentiment_analysis,
-                        })
-                    
-                    # Emit care routing notification if needed
-                    if care_routing.get("needs_routing", False):
-                        socketio.emit('care_routing_alert', {
-                            "type": "care_routing",
-                            "member_id": member_id,
-                            "name": patient["name"],
-                            "routing_level": care_routing.get("routing_level"),
-                            "routing_target": care_routing.get("routing_target"),
-                            "urgency": care_routing.get("urgency"),
-                            "routing_reason": care_routing.get("routing_reason"),
-                            "recommended_action": care_routing.get("recommended_action"),
-                        })
-                    
-                    # Emit care needs notification
-                    if care_needs.get("needs_attention", False):
-                        socketio.emit('care_needs_alert', {
-                            "type": "care_needs",
-                            "member_id": member_id,
-                            "name": patient["name"],
-                            "priority": care_needs.get("priority"),
-                            "care_actions": care_needs.get("care_actions", []),
-                            "refill_assistance": care_needs.get("refill_assistance"),
-                            "recommended_interventions": care_needs.get("recommended_interventions", []),
-                        })
-            
-            # Check all patients for appreciation opportunities
-            for _, row in clean_df.iterrows():
-                member_id = str(row.get("Member ID", ""))
-                if not member_id:
-                    continue
-                
-                previous_state = patient_previous_states.get(member_id, {})
-                appreciation = check_and_appreciate_refilled_patient(dict(row), previous_state=previous_state)
-                
-                # Store current state
-                patient_previous_states[member_id] = {
-                    "adherence": row.get("Adherence Percentage", 0),
-                    "days_until_refill": row.get("days_until_refill"),
-                }
-                
-                # Emit appreciation notification
-                if appreciation.get("should_appreciate", False):
-                    name = row.get("Patient Name", "Patient")
-                    socketio.emit('patient_appreciation', {
-                        "type": "appreciation",
-                        "member_id": member_id,
-                        "name": name,
-                        "reason": appreciation.get("appreciation_reason"),
-                        "message": appreciation.get("appreciation_message"),
-                    })
-        except Exception as e:
-            pass
-    
+    data_hash = hashlib.md5(
+        f"{str(current_columns)}|{len(df)}|{df[adherence_col].sum() if adherence_col in df.columns else 0}".encode()
+    ).hexdigest()
+    previous_columns_hash = current_columns
+    previous_data_hash = data_hash
+
     # Calculate KPIs: High-risk = low adherence AND refill days <= 7
     dur = pd.to_numeric(df.get("days_until_refill"), errors="coerce")
     refill_soon_or_over = dur.notna() & (dur <= 7)
+    refill_overdue_mask = dur.notna() & (dur <= 0)
     high_risk_now = int(((df[adherence_col] < THRESHOLD_LOW) & refill_soon_or_over).sum())
+    # Routed-to-clinic style escalation: low adherence + refill overdue/soon
+    high_risk_refill_over = int(((df[adherence_col] < THRESHOLD_LOW) & refill_overdue_mask).sum())
+    if high_risk_refill_over == 0:
+        high_risk_refill_over = int(((df[adherence_col] < THRESHOLD_LOW) & refill_soon_or_over).sum())
+    refill_over_due_count = int(refill_overdue_mask.sum())
     avg_adherence_now = float(df[adherence_col].mean()) if len(df) else 0.0
+    appreciation_sent_count = 0
+    if "AppreciationSentOn" in df.columns and member_id_col in df.columns:
+        appreciation_sent_count = int(
+            df[pd.to_datetime(df["AppreciationSentOn"], errors="coerce").notna()][member_id_col]
+            .astype(str)
+            .nunique()
+        )
     
     notified_today = 0
     if "NotificationSentOn" in df.columns and member_id_col in df.columns:
@@ -721,6 +553,9 @@ def get_dashboard_data():
             "notified_whatsapp": notified_whatsapp,
             "notified_sms": notified_sms,
             "notified_email": notified_email,
+            "high_risk_refill_over": high_risk_refill_over,
+            "refill_over_due_count": refill_over_due_count,
+            "appreciation_sent_count": appreciation_sent_count,
         },
         "system": {
             "status": system_status,
@@ -1109,6 +944,61 @@ def _build_preview_message_inline(clean_row):
         f"You are on {medication}. Your current adherence is {adherence:.0f} percent. "
         f"Please refill your medication if needed.\n\n{pharmacy_table}\n\nThank you."
     )
+
+
+@app.route('/api/patient-lists', methods=['GET'])
+def get_patient_lists():
+    """Return Member ID + reason lists for routed-to-clinic / refill-overdue views (no other PII)."""
+    try:
+        list_type = (request.args.get("type") or "").strip().lower()
+        df = load_patient_data(force_reload=False)
+        empty = {"routed_to_clinic": [], "refill_overdue": []}
+        if df is None or df.empty:
+            return jsonify(empty)
+
+        adherence_col = "Adherence Percentage" if "Adherence Percentage" in df.columns else "Adeherence Percentage"
+        if adherence_col not in df.columns:
+            df[adherence_col] = 0
+        df[adherence_col] = pd.to_numeric(df[adherence_col], errors="coerce").fillna(0)
+        member_id_col = "Member ID" if "Member ID" in df.columns else "Member_ID"
+        dur = pd.to_numeric(df.get("days_until_refill"), errors="coerce")
+        refill_overdue_mask = dur.notna() & (dur <= 0)
+        refill_soon_mask = dur.notna() & (dur <= 7)
+        routed_mask = (df[adherence_col] < THRESHOLD_LOW) & refill_soon_mask
+
+        def _rows(mask, reason, insight):
+            out = []
+            if member_id_col not in df.columns:
+                return out
+            subset = df.loc[mask, [member_id_col]].drop_duplicates()
+            for _, row in subset.iterrows():
+                mid = str(row.get(member_id_col, "")).strip()
+                if not mid:
+                    continue
+                out.append({
+                    "member_id": mid,
+                    "reason": reason,
+                    "ai_insight": insight,
+                })
+            return out
+
+        routed = _rows(
+            routed_mask,
+            "Low adherence with refill due soon — escalate to clinic",
+            "AI flagged escalation candidate based on adherence and refill timing",
+        )
+        overdue = _rows(
+            refill_overdue_mask,
+            "Refill overdue — patient needs refill now",
+            "Days until refill is zero or negative",
+        )
+        if list_type == "routed_to_clinic":
+            return jsonify({"routed_to_clinic": routed, "refill_overdue": []})
+        if list_type == "refill_overdue":
+            return jsonify({"routed_to_clinic": [], "refill_overdue": overdue})
+        return jsonify({"routed_to_clinic": routed, "refill_overdue": overdue})
+    except Exception as e:
+        return jsonify({"error": str(e), "routed_to_clinic": [], "refill_overdue": []}), 500
 
 
 @app.route('/api/notification-preview', methods=['POST'])
