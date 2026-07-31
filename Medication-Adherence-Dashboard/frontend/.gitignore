@@ -6,8 +6,8 @@
 # Testing
 /coverage
 
-# Production
-/build
+# Production build is committed so cloud hosts can serve the UI without npm
+# /build
 
 # Misc
 .DS_Store
