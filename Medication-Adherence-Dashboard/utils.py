@@ -169,6 +169,31 @@ def route_to_clinician(
         path=path
     )
 
+def _read_excel_dataframe(path: str) -> pd.DataFrame:
+    """Read .xlsx robustly. Prefer pandas+openpyxl; fall back to openpyxl workbook API."""
+    try:
+        import openpyxl  # noqa: F401
+        # Some hosts ship a broken openpyxl without __version__; set a fallback for pandas checks.
+        if not getattr(openpyxl, "__version__", None):
+            openpyxl.__version__ = "3.1.5"
+    except Exception:
+        pass
+    try:
+        return pd.read_excel(path, engine="openpyxl")
+    except Exception as first_err:
+        logger.warning("pandas read_excel failed (%s); trying openpyxl load_workbook", first_err)
+        from openpyxl import load_workbook
+        wb = load_workbook(path, read_only=True, data_only=True)
+        ws = wb.active
+        rows = list(ws.iter_rows(values_only=True))
+        wb.close()
+        if not rows:
+            return pd.DataFrame()
+        headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
+        data = [dict(zip(headers, row)) for row in rows[1:]]
+        return pd.DataFrame(data)
+
+
 def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
     """
     Loads Excel data and caches it; reloads automatically when file time changes.
@@ -182,11 +207,14 @@ def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
         _cached_df = pd.DataFrame()
         _last_mtime = None
         return pd.DataFrame()
-    ensure_excel_columns(EXCEL_PATH)
+    try:
+        ensure_excel_columns(EXCEL_PATH)
+    except Exception as e:
+        logger.warning("ensure_excel_columns skipped: %s", e)
     mtime = os.path.getmtime(EXCEL_PATH)
     if force_reload or _cached_df is None or _last_mtime != mtime:
         try:
-            df = pd.read_excel(EXCEL_PATH, engine="openpyxl")
+            df = _read_excel_dataframe(EXCEL_PATH)
         except Exception as e:
             logger.error("Failed to read Excel at %s: %s", EXCEL_PATH, e)
             raise
