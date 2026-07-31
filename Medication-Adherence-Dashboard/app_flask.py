@@ -99,6 +99,8 @@ refresh_interval = AUTO_REFRESH_SECONDS
 # Short-lived response cache so polling does not thrash CPU/memory
 _dashboard_cache = {"ts": 0.0, "payload": None}
 _DASHBOARD_CACHE_TTL = float(os.getenv("DASHBOARD_CACHE_TTL", "20" if ON_CLOUD else "5"))
+_snapshot_cache: dict = {}
+_SNAPSHOT_CACHE_TTL = float(os.getenv("SNAPSHOT_CACHE_TTL", "30" if ON_CLOUD else "8"))
 
 # Helper functions are now imported from structure.py
 
@@ -874,6 +876,16 @@ def _apply_snapshot_filter(df, filter_type, filter_by, adherence_col, risk_label
 def get_patient_snapshot():
     """Return patient rows from Excel filtered by user selection (adherence or risk, all/low/medium/high), with optional PII masking."""
     try:
+        filter_type = (request.args.get("filter") or "all").strip().lower()
+        filter_by = (request.args.get("filter_by") or "adherence").strip().lower()
+        if filter_by not in ("adherence", "risk"):
+            filter_by = "adherence"
+        mask_pii = request.args.get("mask_pii", "true").strip().lower() in ("true", "1", "yes")
+        cache_key = f"{filter_type}|{filter_by}|{mask_pii}"
+        cached = _snapshot_cache.get(cache_key)
+        if cached and (time.time() - cached["ts"]) < _SNAPSHOT_CACHE_TTL:
+            return jsonify(cached["payload"])
+
         df = load_patient_data(force_reload=False)
         if df.empty:
             return jsonify({"rows": [], "columns": [], "counts": {"all": 0, "low": 0, "medium": 0, "high": 0}, "filter": "all", "filter_by": "adherence"})
@@ -887,12 +899,6 @@ def get_patient_snapshot():
 
         risk_label_col = "RiskLabel" if "RiskLabel" in df.columns else ("Risk_Label" if "Risk_Label" in df.columns else None)
 
-        filter_type = (request.args.get("filter") or "all").strip().lower()
-        filter_by = (request.args.get("filter_by") or "adherence").strip().lower()
-        if filter_by not in ("adherence", "risk"):
-            filter_by = "adherence"
-        mask_pii = request.args.get("mask_pii", "true").strip().lower() in ("true", "1", "yes")
-
         subset, counts, filter_type = _apply_snapshot_filter(df, filter_type, filter_by, adherence_col, risk_label_col)
 
         # Hide backend/technical columns from Data Snapshot grid
@@ -905,25 +911,22 @@ def get_patient_snapshot():
             "AppreciationSentOn",
             "LastUpdated",
         }
-        subset = subset[[c for c in subset.columns if c not in HIDDEN_SNAPSHOT_COLUMNS]]
+        subset = subset[[c for c in subset.columns if c not in HIDDEN_SNAPSHOT_COLUMNS]].copy()
 
         columns = [str(c) for c in subset.columns]
-        rows = []
-        for _, row in subset.iterrows():
-            rec = {}
-            for col in columns:
-                val = row.get(col)
-                if pd.isna(val):
-                    rec[col] = ""
-                elif isinstance(val, (pd.Timestamp, datetime)):
-                    rec[col] = val.strftime("%Y-%m-%d %H:%M") if hasattr(val, "strftime") else str(val)
-                else:
-                    rec[col] = str(val).strip() if isinstance(val, str) else val
-                if mask_pii and col in PII_COLUMNS and rec[col]:
-                    rec[col] = "••••••"
-            rows.append(rec)
+        # Vectorized-ish conversion — iterrows on 2300 rows was ~5s and contributed to 520s
+        for col in columns:
+            if pd.api.types.is_datetime64_any_dtype(subset[col]):
+                subset[col] = subset[col].dt.strftime("%Y-%m-%d %H:%M").fillna("")
+            else:
+                subset[col] = subset[col].apply(
+                    lambda v: "" if pd.isna(v) else (str(v).strip() if isinstance(v, str) else v)
+                )
+            if mask_pii and col in PII_COLUMNS:
+                subset[col] = subset[col].apply(lambda v: "••••••" if v not in ("", None) else "")
+        rows = subset.to_dict(orient="records")
 
-        return jsonify({
+        payload = {
             "rows": rows,
             "columns": columns,
             "counts": counts,
@@ -931,7 +934,9 @@ def get_patient_snapshot():
             "filter": filter_type,
             "filter_by": filter_by,
             "has_risk_column": risk_label_col is not None,
-        })
+        }
+        _snapshot_cache[cache_key] = {"ts": time.time(), "payload": payload}
+        return jsonify(payload)
     except Exception as e:
         return jsonify({"error": str(e), "rows": [], "columns": [], "counts": {"all": 0, "low": 0, "medium": 0, "high": 0}}), 500
 
