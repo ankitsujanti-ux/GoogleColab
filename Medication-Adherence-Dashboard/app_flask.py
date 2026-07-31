@@ -66,6 +66,17 @@ app = Flask(
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
+# Render/Railway free tiers OOM/timeout when the heavy agent loop runs on every refresh.
+ON_CLOUD = any(
+    os.getenv(k)
+    for k in ("RENDER", "RAILWAY_ENVIRONMENT", "FLY_APP_NAME", "WEBSITE_INSTANCE_ID")
+)
+# Heavy BackendRunner (per-row orchestration) kills the only gunicorn worker → Cloudflare 520.
+ENABLE_HEAVY_BACKEND = os.getenv(
+    "ENABLE_HEAVY_BACKEND",
+    "0" if ON_CLOUD else "1",
+).strip().lower() in ("1", "true", "yes")
+
 # Global state
 backend_runner = None
 last_sync_ts = datetime.now()
@@ -77,9 +88,17 @@ previous_data_hash = None
 shown_notification_popups = set()
 last_sent_events = []
 live_on = True
-send_auto_notifications = True  # When False, backend does not send automatic notifications
+# On cloud, default OFF so the process stays responsive; local exe keeps prior behavior.
+send_auto_notifications = (
+    os.getenv("SEND_AUTO_NOTIFICATIONS", "0" if ON_CLOUD else "1").strip().lower()
+    in ("1", "true", "yes")
+)
 patient_previous_states = {}  # Store previous patient states for comparison
 refresh_interval = AUTO_REFRESH_SECONDS
+
+# Short-lived response cache so polling does not thrash CPU/memory
+_dashboard_cache = {"ts": 0.0, "payload": None}
+_DASHBOARD_CACHE_TTL = float(os.getenv("DASHBOARD_CACHE_TTL", "20" if ON_CLOUD else "5"))
 
 # Helper functions are now imported from structure.py
 
@@ -124,26 +143,33 @@ class BackendRunner:
             self._stop.wait(self.refresh_sec)
 
     def _tick(self):
-        df = load_patient_data(force_reload=True)
-        self.stats["monitored"] = len(df)
-        clean_rows, risk_rows = [], []
+        # Light tick: refresh stats only. Full per-row orchestration is opt-in
+        # (ENABLE_HEAVY_BACKEND=1) because it freezes the web worker on cloud.
+        df = load_patient_data(force_reload=False)
+        self.stats["monitored"] = int(len(df))
+        self.stats["rescored"] = int(len(df))
+        self.last_run_ts = datetime.now()
+
+        if not ENABLE_HEAVY_BACKEND or not send_auto_notifications or df is None or df.empty:
+            return
+
+        clean_rows = []
         for _, r in df.iterrows():
             norm = validate_and_normalize_row(r)
-            clean = norm["clean"]
-            clean_rows.append(clean)
-            risk = assess_adherence_risk(clean)
-            risk_rows.append(risk)
+            clean_rows.append(norm["clean"])
         clean_df = pd.DataFrame(clean_rows) if clean_rows else pd.DataFrame()
         self.stats["rescored"] = len(clean_df)
-        
+
         today = pd.Timestamp.now().normalize()
         notif_ts = pd.to_datetime(clean_df.get("NotificationSentOn"), errors="coerce") if "NotificationSentOn" in clean_df.columns else pd.Series(dtype="datetime64[ns]")
         today_sent_before = int((notif_ts.dt.normalize() == today).sum()) if notif_ts is not None and len(clean_df) else 0
-        
+
         sent_ids: list[str] = []
         sent_details: dict[str, dict] = {}
         sent_events: list[dict] = []
-        for _, row in clean_df.iterrows():
+        # Cap work per tick so one cycle cannot take down the host
+        max_rows = int(os.getenv("HEAVY_BACKEND_MAX_ROWS", "50"))
+        for _, row in clean_df.head(max_rows).iterrows():
             row_dict = dict(row)
             last_sent_ts = row_dict.get("NotificationSentOn")
             policy_context = {
@@ -187,22 +213,42 @@ class BackendRunner:
         if sent_events:
             with self._lock:
                 self.last_sent_events.extend(sent_events)
-                # Emit to WebSocket clients
                 socketio.emit('notification_sent', sent_events[-1])
 
 # Initialize backend runner (will be created on first request if needed)
 def get_backend_runner():
     global backend_runner, live_on, refresh_interval
     if backend_runner is None:
-        backend_runner = BackendRunner(refresh_sec=refresh_interval)
+        # On cloud use a longer interval so background work never storms the worker
+        sec = max(refresh_interval, 120) if ON_CLOUD else refresh_interval
+        backend_runner = BackendRunner(refresh_sec=sec)
         if live_on:
             backend_runner.start()
     return backend_runner
 
-# Initialize on module load
-backend_runner = BackendRunner(refresh_sec=AUTO_REFRESH_SECONDS)
+
+def _preload_patient_data():
+    """Warm the data cache after boot so the first user request stays fast."""
+    try:
+        df = load_patient_data(force_reload=False)
+        print(f"[startup] Preloaded {len(df)} patient rows", flush=True)
+    except Exception as e:
+        print(f"[startup] Preload skipped: {e}", flush=True)
+
+
+# Initialize on module load — light runner only (stats), never block HTTP with orchestration
+backend_runner = BackendRunner(refresh_sec=max(AUTO_REFRESH_SECONDS, 120 if ON_CLOUD else AUTO_REFRESH_SECONDS))
 if live_on:
     backend_runner.start()
+
+# Defer heavy data load so gunicorn can bind PORT quickly (Render health checks)
+if ON_CLOUD:
+    threading.Thread(target=_preload_patient_data, daemon=True).start()
+else:
+    try:
+        _preload_patient_data()
+    except Exception:
+        pass
 
 # API Routes
 @app.route('/favicon.ico', methods=['GET'])
@@ -241,17 +287,20 @@ def _save_care_teams(teams):
 
 @app.route('/api/health', methods=['GET'])
 def health():
-    return jsonify({"status": "ok"})
+    # Must stay trivial — Render/Cloudflare probe this. Never touch Excel/pandas here.
+    return jsonify({"status": "ok", "cloud": ON_CLOUD})
 
 
 @app.route('/api/data-source', methods=['GET'])
 def get_data_source():
     """Tell the UI where the app looks for the Excel file and whether it exists."""
     path = EXCEL_PATH
-    exists = os.path.isfile(path)
+    csv_path = os.path.splitext(path)[0] + ".csv"
+    exists = os.path.isfile(path) or os.path.isfile(csv_path)
     return jsonify({
         "path": path,
         "exists": exists,
+        "csv_exists": os.path.isfile(csv_path),
         "message": "Data file found." if exists else "Put patients.xlsx in the Data folder next to the app (or set EXCEL_PATH in .env)."
     })
 
@@ -361,8 +410,16 @@ def get_dashboard_data():
     """Get all dashboard data. Always returns 200 with valid structure (zeros when no data) so dashboard is never blank."""
     global last_sync_ts, previous_columns_hash, previous_data_hash, processed_high_risk_patients, high_risk_notifications
     import traceback
+
+    now_mono = time.time()
+    cached = _dashboard_cache.get("payload")
+    if cached is not None and (now_mono - float(_dashboard_cache.get("ts") or 0)) < _DASHBOARD_CACHE_TTL:
+        return jsonify(cached)
+
     try:
-        df = load_patient_data(force_reload=live_on)
+        # Never force-reload on the HTTP path — mtime cache in utils handles freshness.
+        # force_reload=True previously re-read 2300 rows on every poll and caused 520s.
+        df = load_patient_data(force_reload=False)
     except Exception as e:
         traceback.print_exc()
         return jsonify(_default_dashboard_response(data_error=str(e)))
@@ -530,7 +587,7 @@ def get_dashboard_data():
         agents_running = 0
         system_status = "Paused"
     
-    return jsonify({
+    payload = {
         "kpis": {
             "interventions_30d": interventions_30d,
             "notified_unique": notified_unique,
@@ -571,8 +628,14 @@ def get_dashboard_data():
             "high_risk_last_week": high_risk_last_week,
             "avg_adherence_last_month": avg_adherence_last_month,
         },
-        "data_source": {"path": EXCEL_PATH, "exists": os.path.isfile(EXCEL_PATH)}
-    })
+        "data_source": {
+            "path": EXCEL_PATH,
+            "exists": os.path.isfile(EXCEL_PATH) or os.path.isfile(os.path.splitext(EXCEL_PATH)[0] + ".csv"),
+        },
+    }
+    _dashboard_cache["payload"] = payload
+    _dashboard_cache["ts"] = time.time()
+    return jsonify(payload)
 
 @app.errorhandler(500)
 def handle_500(e):

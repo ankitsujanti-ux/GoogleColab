@@ -3,15 +3,25 @@ services:
     name: medication-adherence-dashboard
     runtime: python
     plan: free
+    rootDir: Medication-Adherence-Dashboard
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --worker-class gthread --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT app_flask:app
+    startCommand: gunicorn --worker-class gthread --workers 1 --threads 4 --timeout 90 --graceful-timeout 30 --keep-alive 5 --max-requests 200 --max-requests-jitter 40 --bind 0.0.0.0:$PORT app_flask:app
+    healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
       - key: FLASK_DEBUG
         value: "false"
       - key: EXCEL_PATH
-        value: ./Data/patients.xlsx
+        value: ./Data/patients.csv
+      - key: PREFER_CSV
+        value: "1"
+      - key: ENABLE_HEAVY_BACKEND
+        value: "0"
+      - key: SEND_AUTO_NOTIFICATIONS
+        value: "0"
+      - key: DASHBOARD_CACHE_TTL
+        value: "20"
       - key: AUTO_REFRESH_SECONDS
         value: "60"
       - key: THRESHOLD_LOW

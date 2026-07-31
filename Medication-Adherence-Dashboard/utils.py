@@ -267,14 +267,24 @@ def _read_xlsx_via_zip(path: str) -> pd.DataFrame:
 def _read_excel_dataframe(path: str) -> pd.DataFrame:
     """
     Read patient data robustly.
-    Order: direct CSV path → pandas/openpyxl → load_workbook → stdlib zip → sibling CSV.
-    Sibling CSV exists for hosts where openpyxl imports are broken (Render).
+    On cloud / when sibling CSV exists: prefer CSV first (avoids broken openpyxl + faster).
+    Else: pandas/openpyxl → load_workbook → stdlib zip → sibling CSV.
     """
     csv_path = _sibling_csv_path(path)
     errors: List[str] = []
+    on_cloud = any(
+        os.getenv(k)
+        for k in ("RENDER", "RAILWAY_ENVIRONMENT", "FLY_APP_NAME", "WEBSITE_INSTANCE_ID")
+    )
+    prefer_csv = os.getenv("PREFER_CSV", "1" if on_cloud else "0").strip().lower() in ("1", "true", "yes")
 
     if path.lower().endswith(".csv"):
         return pd.read_csv(path, low_memory=False)
+
+    # Prefer CSV on Render — openpyxl has been unreliable and slow there.
+    if prefer_csv and os.path.isfile(csv_path):
+        logger.info("Loading patient data from CSV (preferred): %s", csv_path)
+        return pd.read_csv(csv_path, low_memory=False)
 
     if os.path.isfile(path):
         _purge_broken_openpyxl()
@@ -304,8 +314,6 @@ def _read_excel_dataframe(path: str) -> pd.DataFrame:
             logger.warning("openpyxl load_workbook failed (%s); trying CSV/zip fallbacks", second_err)
             _purge_broken_openpyxl()
 
-    # Prefer known-good CSV before the stdlib zip reader (zip headers can be wrong
-    # for some workbooks; CSV is shipped alongside patients.xlsx for Render).
     if os.path.isfile(csv_path):
         logger.warning("Falling back to CSV patient data at %s", csv_path)
         return pd.read_csv(csv_path, low_memory=False)
@@ -343,8 +351,19 @@ def load_patient_data(force_reload: bool = False) -> pd.DataFrame:
         _cached_df = pd.DataFrame()
         _last_mtime = None
         return pd.DataFrame()
+    # Skip ensure_excel_columns on cloud / when CSV is preferred — it re-reads and
+    # may rewrite the xlsx via openpyxl, which has caused hangs and 520s on Render.
+    on_cloud = any(
+        os.getenv(k)
+        for k in ("RENDER", "RAILWAY_ENVIRONMENT", "FLY_APP_NAME", "WEBSITE_INSTANCE_ID")
+    )
+    prefer_csv = os.getenv("PREFER_CSV", "1" if on_cloud else "0").strip().lower() in ("1", "true", "yes")
     try:
-        if os.path.exists(EXCEL_PATH) and EXCEL_PATH.lower().endswith((".xlsx", ".xlsm")):
+        if (
+            not prefer_csv
+            and os.path.exists(EXCEL_PATH)
+            and EXCEL_PATH.lower().endswith((".xlsx", ".xlsm"))
+        ):
             ensure_excel_columns(EXCEL_PATH)
     except Exception as e:
         logger.warning("ensure_excel_columns skipped: %s", e)

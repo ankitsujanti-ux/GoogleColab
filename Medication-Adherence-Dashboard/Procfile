@@ -1,1 +1,1 @@
-web: gunicorn --worker-class gthread --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT app_flask:app
+web: gunicorn --worker-class gthread --workers 1 --threads 4 --timeout 90 --graceful-timeout 30 --keep-alive 5 --max-requests 200 --max-requests-jitter 40 --bind 0.0.0.0:$PORT app_flask:app
