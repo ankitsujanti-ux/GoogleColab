@@ -4,22 +4,29 @@ GitHub stores the **code**. A **public URL** people can open in a browser needs 
 
 ## 1) Code is on GitHub
 
-Repo folder: https://github.com/ankitsujanti-ux/GoogleColab/tree/main/Medication-Adherence-Dashboard
+Folder: https://github.com/ankitsujanti-ux/GoogleColab/tree/main/Medication-Adherence-Dashboard
 
 ## 2) Deploy on Render (recommended, free)
 
-1. Open https://dashboard.render.com and sign in with GitHub.
-2. Click **New +** → **Blueprint** (or **Web Service**).
-3. Connect the repo `ankitsujanti-ux/Medication-Adherence-Dashboard`.
-4. Render reads `render.yaml` automatically.
-5. Set optional secrets (for AI / SMS / email features):
-   - `OPENAI_API_KEY`
-   - Twilio / SendGrid / Pushover keys if you use those features  
-   Leave them blank for a view-only dashboard demo.
-6. Click **Apply** / **Create Web Service**.
-7. Wait 2–5 minutes. Your public link looks like:
+### Option A — Blueprint (easiest)
 
-   `https://medication-adherence-dashboard.onrender.com`
+1. Open https://dashboard.render.com and sign in with **GitHub**.
+2. Click **New +** → **Blueprint**.
+3. Select repo `ankitsujanti-ux/GoogleColab` (root `render.yaml` points at this folder).
+4. Optionally set `OPENAI_API_KEY` (and Twilio/SendGrid/Pushover if needed). Leave blank for view-only demo.
+5. Click **Apply**. Wait 2–5 minutes.
+
+### Option B — Web Service manually
+
+1. **New +** → **Web Service** → connect `ankitsujanti-ux/GoogleColab`.
+2. Set **Root Directory** to: `Medication-Adherence-Dashboard`
+3. Build: `pip install -r requirements.txt`
+4. Start: `python main.py`
+5. Create Web Service.
+
+Your public link will look like:
+
+`https://medication-adherence-dashboard.onrender.com`
 
 Share that HTTPS link with anyone.
 
